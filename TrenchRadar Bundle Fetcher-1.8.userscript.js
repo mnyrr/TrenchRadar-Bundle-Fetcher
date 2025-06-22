@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TrenchRadar Bundle Fetcher
 // @namespace    http://tampermonkey.net/
-// @version      1.8
+// @version      1.8.1
 // @match        https://axiom.trade/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_cookie
@@ -12,54 +12,17 @@
 (function() {
     'use strict';
 
-    // Функция для закрытия попапа и оверлея
+    // Функция для закрытия попапа
     function closeInfoPopup() {
         const infoDiv = document.getElementById('trench-info-div');
-        const overlay = document.getElementById('trench-overlay');
-
         if (infoDiv && infoDiv.style.display !== 'none') {
             infoDiv.style.opacity = '0';
             setTimeout(() => { infoDiv.style.display = 'none'; }, 300);
         }
-
-        if (overlay) {
-            overlay.style.opacity = '0';
-            setTimeout(() => { overlay.style.display = 'none'; }, 300);
-        }
-    }
-
-    // Функция для создания оверлея
-    function createOverlay() {
-        let overlay = document.getElementById('trench-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'trench-overlay';
-            Object.assign(overlay.style, {
-                position: 'fixed',
-                top: '0',
-                left: '0',
-                width: '100vw',
-                height: '100vh',
-                backgroundColor: 'rgba(0,0,0,0.05)',
-                backdropFilter: 'blur(2px)',
-                zIndex: '99990',
-                display: 'none',
-                opacity: '0',
-                transition: 'opacity 0.3s ease'
-            });
-            document.body.appendChild(overlay);
-
-            // Закрытие при клике на оверлей
-            overlay.addEventListener('click', () => {
-                closeInfoPopup();
-            });
-        }
-        return overlay;
     }
 
     function createOrUpdateInfo(data) {
         let div = document.getElementById('trench-info-div');
-        const overlay = createOverlay();
         const button = document.getElementById('trench-check-btn');
 
         if (!div) {
@@ -67,8 +30,8 @@
             div.id = 'trench-info-div';
             Object.assign(div.style, {
                 position: 'fixed',
-                width: '400px',
-                maxHeight: '75vh',
+                width: '380px',
+                maxHeight: '90vh',
                 overflowY: 'auto',
                 padding: '0',
                 backgroundColor: 'rgba(33,33,33,0.98)',
@@ -96,15 +59,11 @@
             div.style.top = (rect.bottom + window.scrollY + 10) + 'px';
             div.style.left = (rect.left + window.scrollX -100) + 'px';
         } else {
-            // Запасное позиционирование
             div.style.top = '60px';
             div.style.right = '15px';
         }
 
-        // Предотвращаем закрытие при клике внутри попапа
-        div.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
+        div.addEventListener('click', (e) => e.stopPropagation());
 
         if (typeof data === 'string') {
             const errorDiv = document.createElement('div');
@@ -112,15 +71,11 @@
             errorDiv.textContent = data;
             div.appendChild(errorDiv);
             div.style.display = 'block';
-            overlay.style.display = 'block';
-            setTimeout(() => {
-                div.style.opacity = '1';
-                overlay.style.opacity = '1';
-            }, 10);
+            setTimeout(() => div.style.opacity = '1', 10);
             return;
         }
 
-        // Header
+        // Header (закрепленный)
         const header = document.createElement('div');
         header.style.display = 'flex';
         header.style.justifyContent = 'space-between';
@@ -128,6 +83,9 @@
         header.style.padding = '10px 15px';
         header.style.borderBottom = '1px solid #444';
         header.style.background = 'linear-gradient(to right, #1a1a2e, #16213e)';
+        header.style.position = 'sticky';
+        header.style.top = '0';
+        header.style.zIndex = '1';
 
         const title = document.createElement('h2');
         title.innerHTML = `<span style="color: #eee;">TrenchRadar:</span> <span style="color: #4fc3f7;">$${data.tokenTicker}</span>`;
@@ -138,11 +96,17 @@
         const closeBtn = document.createElement('div');
         closeBtn.innerHTML = '&times;';
         closeBtn.style.cursor = 'pointer';
-        closeBtn.style.fontSize = '24px';
-        closeBtn.style.color = '#aaa';
-        closeBtn.addEventListener('click', () => {
-            closeInfoPopup();
-        });
+        closeBtn.style.fontSize = '26px'; // Увеличен размер крестика
+        closeBtn.style.color = '#ddd';
+        closeBtn.style.width = '30px';
+        closeBtn.style.height = '30px';
+        closeBtn.style.display = 'flex';
+        closeBtn.style.alignItems = 'center';
+        closeBtn.style.justifyContent = 'center';
+        closeBtn.style.transition = 'color 0.2s';
+        closeBtn.addEventListener('mouseover', () => closeBtn.style.color = '#fff');
+        closeBtn.addEventListener('mouseout', () => closeBtn.style.color = '#ddd');
+        closeBtn.addEventListener('click', closeInfoPopup);
 
         header.appendChild(title);
         header.appendChild(closeBtn);
@@ -328,15 +292,11 @@
         footer.style.fontSize = '11px';
         footer.style.color = '#666';
         footer.style.borderTop = '1px solid #333';
-        footer.textContent = 'Data provided by TrenchRadar • v1.8';
+        footer.textContent = 'Data provided by TrenchRadar • v1.8.1';
         div.appendChild(footer);
 
         div.style.display = 'block';
-        overlay.style.display = 'block';
-        setTimeout(() => {
-            div.style.opacity = '1';
-            overlay.style.opacity = '1';
-        }, 10);
+        setTimeout(() => div.style.opacity = '1', 10);
     }
 
     function fetchTrenchBotBundles(tokenAddress) {
