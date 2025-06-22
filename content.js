@@ -247,116 +247,129 @@
         div.appendChild(overallSection);
 
         // Top Bundles
-        const topSection = document.createElement('section');
-        topSection.style.padding = '15px';
+const topSection = document.createElement('section');
+topSection.style.padding = '15px';
 
-        const topTitle = document.createElement('h3');
-        topTitle.innerHTML = '🏆 <span style="border-bottom: 1px dashed #666; padding-bottom: 3px; font-weight: 600;">Top 5 Holding Bundles</span>';
-        topTitle.style.marginTop = '0';
-        topTitle.style.marginBottom = '15px';
-        topTitle.style.fontSize = '16px';
-        topTitle.style.color = '#ffb74d';
-        topTitle.style.fontWeight = '600';
+const topTitle = document.createElement('h3');
+topTitle.innerHTML = '🏆 <span style="border-bottom: 1px dashed #666; padding-bottom: 3px; font-weight: 600;">Top 5 Holding Bundles</span>';
+topTitle.style.marginTop = '0';
+topTitle.style.marginBottom = '15px';
+topTitle.style.fontSize = '16px';
+topTitle.style.color = '#ffb74d';
+topTitle.style.fontWeight = '600';
 
-        topSection.appendChild(topTitle);
+topSection.appendChild(topTitle);
 
-        if (data.topBundles.length === 0) {
-            const empty = document.createElement('div');
-            empty.style.textAlign = 'center';
-            empty.style.padding = '20px 0';
-            empty.style.color = '#888';
-            empty.textContent = 'No bundles holding tokens';
-            topSection.appendChild(empty);
-        } else {
-            data.topBundles.forEach(bundle => {
-                const bundleCard = document.createElement('div');
-                bundleCard.style.background = 'rgba(50,50,70,0.4)';
-                bundleCard.style.borderRadius = '8px';
-                bundleCard.style.padding = '8px 15px';
-                bundleCard.style.marginBottom = '8px';
-                bundleCard.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-                bundleCard.style.borderLeft = '3px solid #4a148c';
+if (data.topBundles.length === 0) {
+    const empty = document.createElement('div');
+    empty.style.textAlign = 'center';
+    empty.style.padding = '20px 0';
+    empty.style.color = '#888';
+    empty.textContent = 'No bundles holding tokens';
+    topSection.appendChild(empty);
+} else {
+    data.topBundles.forEach(bundle => {
+        const bundleCard = document.createElement('div');
+        bundleCard.style.background = 'rgba(50,50,70,0.4)';
+        bundleCard.style.borderRadius = '8px';
+        bundleCard.style.padding = '8px 15px';
+        bundleCard.style.marginBottom = '8px';
+        bundleCard.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+        bundleCard.style.borderLeft = '3px solid #4a148c';
 
-                const bundleHeader = document.createElement('div');
-                bundleHeader.style.display = 'flex';
-                bundleHeader.style.justifyContent = 'space-between';
-                bundleHeader.style.alignItems = 'center';
-                bundleHeader.style.marginBottom = '8px';
+        const bundleHeader = document.createElement('div');
+        bundleHeader.style.display = 'flex';
+        bundleHeader.style.justifyContent = 'space-between';
+        bundleHeader.style.alignItems = 'center';
+        bundleHeader.style.marginBottom = '8px';
 
-                const bundleTitle = document.createElement('div');
-                bundleTitle.style.display = 'flex';
-                bundleTitle.style.alignItems = 'center';
-                bundleTitle.style.gap = '8px';
+        const bundleTitle = document.createElement('div');
+        bundleTitle.style.display = 'flex';
+        bundleTitle.style.alignItems = 'center';
+        bundleTitle.style.gap = '8px';
 
-                const categoryEmoji = {
-                    sniper: '🎯',
-                    new_wallet: '🌱',
-                    regular: '✅'
-                }[bundle.primaryCategory] || '🔹';
+        const categoryEmoji = {
+            sniper: '🎯',
+            new_wallet: '🌱',
+            regular: '✅'
+        }[bundle.primaryCategory] || '🔹';
 
-                const emojiSpan = document.createElement('span');
-                emojiSpan.textContent = categoryEmoji;
-                emojiSpan.style.fontSize = '20px';
+        const emojiSpan = document.createElement('span');
+        emojiSpan.textContent = categoryEmoji;
+        emojiSpan.style.fontSize = '20px';
 
-                const idSpan = document.createElement('span');
-                idSpan.textContent = `Slot ${bundle.id}`;
-                idSpan.style.fontWeight = '600';
-                idSpan.style.color = '#e1bee7';
+        const idSpan = document.createElement('span');
+        idSpan.textContent = `Slot ${bundle.id}`;
+        idSpan.style.fontWeight = '600';
+        idSpan.style.color = '#e1bee7';
 
-                bundleTitle.appendChild(emojiSpan);
-                bundleTitle.appendChild(idSpan);
-                bundleHeader.appendChild(bundleTitle);
+        bundleTitle.appendChild(emojiSpan);
+        bundleTitle.appendChild(idSpan);
+        bundleHeader.appendChild(bundleTitle);
 
-                const categorySpan = document.createElement('span');
-                categorySpan.textContent = bundle.primaryCategory;
-                categorySpan.style.background = '#4527a0';
-                categorySpan.style.color = '#d1c4e9';
-                categorySpan.style.padding = '3px 20px';
-                categorySpan.style.borderRadius = '10px';
-                categorySpan.style.fontSize = '14px';
-                categorySpan.style.fontWeight = '600';
-                bundleHeader.appendChild(categorySpan);
+        const categorySpan = document.createElement('span');
+        categorySpan.textContent = bundle.primaryCategory;
+        categorySpan.style.background = '#4527a0';
+        categorySpan.style.color = '#d1c4e9';
+        categorySpan.style.padding = '3px 20px';
+        categorySpan.style.borderRadius = '10px';
+        categorySpan.style.fontSize = '14px';
+        categorySpan.style.fontWeight = '600';
+        bundleHeader.appendChild(categorySpan);
 
-                bundleCard.appendChild(bundleHeader);
+        bundleCard.appendChild(bundleHeader);
 
-                const bundleStats = [
-                    { icon: '👥', label: 'Unique Wallets', value: bundle.uniqueWallets, fontWeight: '600' },
-                    { icon: '💸', label: 'SOL Spent', value: bundle.solSpent + ' SOL', fontWeight: '600' },
-                    { icon: '📌', label: 'Remaining Supply', value: bundle.holdingPercentage + '%', fontWeight: '600' }
-                ];
+        const bundleStats = [
+            { icon: '👥', label: 'Unique Wallets', value: bundle.uniqueWallets, fontWeight: '600' },
+            { icon: '💸', label: 'SOL Spent', value: bundle.solSpent + ' SOL', fontWeight: '600' },
+            { icon: '📌', label: 'Remaining Supply', value: bundle.holdingPercentage + '%', fontWeight: '600', isSupply: true }
+        ];
 
-                bundleStats.forEach(stat => {
-                    const statRow = document.createElement('div');
-                    statRow.style.display = 'flex';
-                    statRow.style.justifyContent = 'space-between';
-                    statRow.style.marginBottom = '3px';
-                    statRow.style.fontSize = '14px';
+        bundleStats.forEach(stat => {
+            const statRow = document.createElement('div');
+            statRow.style.display = 'flex';
+            statRow.style.justifyContent = 'space-between';
+            statRow.style.marginBottom = '3px';
+            statRow.style.fontSize = '14px';
 
-                    const labelDiv = document.createElement('div');
-                    labelDiv.style.display = 'flex';
-                    labelDiv.style.alignItems = 'center';
-                    labelDiv.style.gap = '6px';
-                    labelDiv.style.color = '#aaa';
-                    labelDiv.style.fontWeight = '500';
+            const labelDiv = document.createElement('div');
+            labelDiv.style.display = 'flex';
+            labelDiv.style.alignItems = 'center';
+            labelDiv.style.gap = '6px';
+            labelDiv.style.color = '#aaa';
+            labelDiv.style.fontWeight = '500';
 
-                    const iconSpan = document.createElement('span');
-                    iconSpan.textContent = stat.icon;
+            const iconSpan = document.createElement('span');
+            iconSpan.textContent = stat.icon;
 
-                    const textSpan = document.createElement('span');
-                    textSpan.textContent = stat.label;
+            const textSpan = document.createElement('span');
+            textSpan.textContent = stat.label;
 
-                    labelDiv.appendChild(iconSpan);
-                    labelDiv.appendChild(textSpan);
+            labelDiv.appendChild(iconSpan);
+            labelDiv.appendChild(textSpan);
 
-                    const valueDiv = document.createElement('div');
-                    valueDiv.textContent = stat.value;
-                    valueDiv.style.fontWeight = stat.fontWeight || '600';
-                    valueDiv.style.color = '#fff';
+            const valueDiv = document.createElement('div');
+            valueDiv.textContent = stat.value;
+            valueDiv.style.fontWeight = stat.fontWeight || '600';
 
-                    statRow.appendChild(labelDiv);
-                    statRow.appendChild(valueDiv);
-                    bundleCard.appendChild(statRow);
-                });
+            // Установка цвета для Remaining Supply
+            if (stat.isSupply) {
+                const percentage = parseFloat(bundle.holdingPercentage);
+                if (percentage > 4) {
+                    valueDiv.style.color = '#f15974'; // розовый / красноватый
+                } else if (percentage === 0) {
+                    valueDiv.style.color = '#4caf50'; // зеленый в тональности
+                } else {
+                    valueDiv.style.color = '#fbc02d'; // желтый в тональности
+                }
+            } else {
+                valueDiv.style.color = '#fff';
+            }
+
+            statRow.appendChild(labelDiv);
+            statRow.appendChild(valueDiv);
+            bundleCard.appendChild(statRow);
+        });
 
                 // Индикатор прогресса
                 const progressContainer = document.createElement('div');
