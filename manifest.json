@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "TrenchRadar Bundle Fetcher",
+  "version": "1.9.4",
+  "description": "Fetches bundle information from TrenchRadar for tokens on Axiom",
+  "permissions": [
+    "cookies",
+    "storage",
+    "webRequest",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://axiom.trade/*",
+    "https://trench.bot/*",
+    "https://api3.axiom.trade/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://axiom.trade/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
