@@ -73,15 +73,15 @@
                 padding: '0',
                 backgroundColor: 'rgba(33,33,33,0.98)',
                 color: 'white',
-                fontSize: '13px',
+                fontSize: '14px',
                 borderRadius: '6px',
                 zIndex: '99999',
                 cursor: 'default',
                 display: 'none',
                 fontFamily: '"Segoe UI", Roboto, sans-serif',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.7)',
-                border: '2px solid rgba(100, 180, 246, 0.5)',
-                outline: '3px solid rgba(255, 255, 255, 0.1)',
+                border: '2px solid rgba(139, 101, 255, 0.3)',
+                outline: '2px solid rgba(255, 255, 255, 0.1)',
                 opacity: '0',
                 transition: 'opacity 0.3s ease'
             });
@@ -94,7 +94,7 @@
         if (button) {
             const rect = button.getBoundingClientRect();
             div.style.top = (rect.bottom + window.scrollY + 10) + 'px';
-            div.style.left = (rect.left + window.scrollX -70) + 'px';
+            div.style.left = (rect.left + window.scrollX -100) + 'px';
         } else {
             // Запасное позиционирование
             div.style.top = '60px';
@@ -125,7 +125,7 @@
         header.style.display = 'flex';
         header.style.justifyContent = 'space-between';
         header.style.alignItems = 'center';
-        header.style.padding = '15px 15px 12px';
+        header.style.padding = '10px 15px';
         header.style.borderBottom = '1px solid #444';
         header.style.background = 'linear-gradient(to right, #1a1a2e, #16213e)';
 
@@ -150,31 +150,32 @@
 
         // Overall Stats
         const overallSection = document.createElement('section');
-        overallSection.style.padding = '15px';
+        overallSection.style.padding = '10px 15px';
         overallSection.style.borderBottom = '1px solid #444';
 
         const overallTitle = document.createElement('h3');
         overallTitle.innerHTML = '📊 <span style="border-bottom: 1px dashed #666; padding-bottom: 3px;">Overall Statistics</span>';
-        overallTitle.style.marginTop = '0';
-        overallTitle.style.marginBottom = '15px';
+        overallTitle.style.marginTop = '3px';
+        overallTitle.style.marginBottom = '8px';
         overallTitle.style.fontSize = '15px';
         overallTitle.style.color = '#ffb74d';
 
         overallSection.appendChild(overallTitle);
 
         const stats = [
-            { icon: '💼', label: 'Holding Bundles', value: data.overall.holdingBundles, color: '#e57373' },
-            { icon: '📦', label: 'Total Bundles', value: data.overall.totalBundles, color: '#ba68c8' },
-            { icon: '💰', label: 'Total SOL Spent', value: data.overall.totalSol + ' SOL', color: '#4db6ac' },
-            { icon: '📈', label: 'Current Held Percentage', value: data.overall.totalHolding + '%', color: '#64b5f6' }
+            { icon: '📦', label: 'Holding Bundles', value: data.overall.holdingBundles + ' (Holding) / ' + data.overall.totalBundles + ' (Total)', color: '#f15974' },
+            // { icon: '📦', label: 'Total Bundles', value: data.overall.totalBundles, color: '#ba68c8' },
+            { icon: '💰', label: 'Total SOL Spent', value: data.overall.totalSol + ' SOL', color: '#fff' },
+            { icon: '📈', label: 'Current Held Percentage', value: data.overall.totalHolding + '%', color: '#f15974' }
         ];
 
         stats.forEach(stat => {
             const statRow = document.createElement('div');
             statRow.style.display = 'flex';
             statRow.style.justifyContent = 'space-between';
-            statRow.style.marginBottom = '10px';
+            statRow.style.marginBottom = '3px';
             statRow.style.alignItems = 'center';
+            statRow.style.padding = '5px 10px';
 
             const labelDiv = document.createElement('div');
             labelDiv.style.display = 'flex';
@@ -229,8 +230,8 @@
                 const bundleCard = document.createElement('div');
                 bundleCard.style.background = 'rgba(50,50,70,0.4)';
                 bundleCard.style.borderRadius = '8px';
-                bundleCard.style.padding = '12px';
-                bundleCard.style.marginBottom = '12px';
+                bundleCard.style.padding = '8px 15px';
+                bundleCard.style.marginBottom = '8px';
                 bundleCard.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
                 bundleCard.style.borderLeft = '3px solid #4a148c';
 
@@ -268,9 +269,9 @@
                 categorySpan.textContent = bundle.primaryCategory;
                 categorySpan.style.background = '#4527a0';
                 categorySpan.style.color = '#d1c4e9';
-                categorySpan.style.padding = '3px 8px';
+                categorySpan.style.padding = '3px 20px';
                 categorySpan.style.borderRadius = '10px';
-                categorySpan.style.fontSize = '12px';
+                categorySpan.style.fontSize = '14px';
                 bundleHeader.appendChild(categorySpan);
 
                 bundleCard.appendChild(bundleHeader);
@@ -286,8 +287,8 @@
                     const statRow = document.createElement('div');
                     statRow.style.display = 'flex';
                     statRow.style.justifyContent = 'space-between';
-                    statRow.style.marginBottom = '6px';
-                    statRow.style.fontSize = '13px';
+                    statRow.style.marginBottom = '3px';
+                    statRow.style.fontSize = '14px';
 
                     const labelDiv = document.createElement('div');
                     labelDiv.style.display = 'flex';
