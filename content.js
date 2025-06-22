@@ -375,7 +375,7 @@
                 progressBar.style.borderRadius = '4px';
 
                 const progressText = document.createElement('div');
-                progressText.textContent = `Remaining Bundle: ${bundle.remainingBundlePercent.toFixed(4)}%`;
+                progressText.textContent = `Remaining Bundle: ${bundle.remainingBundlePercent.toFixed(2)}%`;
                 progressText.style.position = 'absolute';
                 progressText.style.top = '0';
                 progressText.style.left = '0';
