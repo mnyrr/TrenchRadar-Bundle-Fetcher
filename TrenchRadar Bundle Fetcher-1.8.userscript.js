@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TrenchRadar Bundle Fetcher
 // @namespace    http://tampermonkey.net/
-// @version      1.8.1
+// @version      1.9.4
 // @match        https://axiom.trade/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_cookie
@@ -12,13 +12,36 @@
 (function() {
     'use strict';
 
+    // Переменные для отслеживания активных запросов
+    let activeAxiomRequest = null;
+    let activeTrenchRequest = null;
+    let isPopupOpen = false;
+
     // Функция для закрытия попапа
     function closeInfoPopup() {
         const infoDiv = document.getElementById('trench-info-div');
         if (infoDiv && infoDiv.style.display !== 'none') {
             infoDiv.style.opacity = '0';
-            setTimeout(() => { infoDiv.style.display = 'none'; }, 300);
+            setTimeout(() => {
+                infoDiv.style.display = 'none';
+                isPopupOpen = false;
+
+                // Отменяем активные запросы
+                if (activeAxiomRequest) {
+                    activeAxiomRequest.abort();
+                    activeAxiomRequest = null;
+                }
+                if (activeTrenchRequest) {
+                    activeTrenchRequest.abort();
+                    activeTrenchRequest = null;
+                }
+            }, 300);
         }
+    }
+
+    // Закрытие попапа при изменении URL
+    function handleUrlChange() {
+        closeInfoPopup();
     }
 
     function createOrUpdateInfo(data) {
@@ -37,41 +60,101 @@
                 backgroundColor: 'rgba(33,33,33,0.98)',
                 color: 'white',
                 fontSize: '14px',
+                fontWeight: '500', // Увеличенная жирность текста
                 borderRadius: '6px',
                 zIndex: '99999',
                 cursor: 'default',
                 display: 'none',
-                fontFamily: '"Segoe UI", Roboto, sans-serif',
+                fontFamily: "'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
                 boxShadow: '0 4px 20px rgba(0,0,0,0.7)',
                 border: '2px solid rgba(139, 101, 255, 0.3)',
                 outline: '2px solid rgba(255, 255, 255, 0.1)',
                 opacity: '0',
                 transition: 'opacity 0.3s ease'
             });
+
+            // Закрытие попапа при клике на него
+            div.addEventListener('click', closeInfoPopup);
+
             document.body.appendChild(div);
         } else {
             div.innerHTML = '';
         }
 
-        // Позиционируем попап под кнопкой
+        // Правильное позиционирование попапа под кнопкой (центрирование)
         if (button) {
             const rect = button.getBoundingClientRect();
+            const popupWidth = 380;
+            const leftPosition = rect.left + window.scrollX + (rect.width / 2) - (popupWidth / 2);
+
             div.style.top = (rect.bottom + window.scrollY + 10) + 'px';
-            div.style.left = (rect.left + window.scrollX -100) + 'px';
+            div.style.left = Math.max(10, leftPosition) + 'px';
         } else {
             div.style.top = '60px';
             div.style.right = '15px';
         }
 
-        div.addEventListener('click', (e) => e.stopPropagation());
-
         if (typeof data === 'string') {
-            const errorDiv = document.createElement('div');
-            errorDiv.style.padding = '15px';
-            errorDiv.textContent = data;
-            div.appendChild(errorDiv);
+            // Стильный индикатор загрузки
+            const loadingContainer = document.createElement('div');
+            loadingContainer.style.padding = '30px 20px';
+            loadingContainer.style.textAlign = 'center';
+
+            const spinnerContainer = document.createElement('div');
+            spinnerContainer.style.display = 'inline-block';
+            spinnerContainer.style.position = 'relative';
+            spinnerContainer.style.width = '80px';
+            spinnerContainer.style.height = '80px';
+
+            const spinner = document.createElement('div');
+            spinner.style.position = 'absolute';
+            spinner.style.width = '64px';
+            spinner.style.height = '64px';
+            spinner.style.margin = '8px';
+            spinner.style.border = '6px solid rgba(139, 101, 255, 0.3)';
+            spinner.style.borderRadius = '50%';
+            spinner.style.borderTopColor = '#8e2de2';
+            spinner.style.animation = 'spin 1s ease-in-out infinite';
+
+            const innerSpinner = document.createElement('div');
+            innerSpinner.style.position = 'absolute';
+            innerSpinner.style.width = '40px';
+            innerSpinner.style.height = '40px';
+            innerSpinner.style.margin = '20px';
+            innerSpinner.style.border = '4px solid rgba(139, 101, 255, 0.3)';
+            innerSpinner.style.borderRadius = '50%';
+            innerSpinner.style.borderTopColor = '#4a00e0';
+            innerSpinner.style.animation = 'spinReverse 1.2s ease-in-out infinite';
+
+            const loadingText = document.createElement('div');
+            loadingText.textContent = 'Loading...';
+            loadingText.style.marginTop = '20px';
+            loadingText.style.fontSize = '16px';
+            loadingText.style.fontWeight = '600';
+            loadingText.style.color = '#bbb';
+            loadingText.style.letterSpacing = '1px';
+
+            // Добавляем CSS анимацию
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+                @keyframes spinReverse {
+                    to { transform: rotate(-360deg); }
+                }
+            `;
+
+            spinnerContainer.appendChild(spinner);
+            spinnerContainer.appendChild(innerSpinner);
+            loadingContainer.appendChild(style);
+            loadingContainer.appendChild(spinnerContainer);
+            loadingContainer.appendChild(loadingText);
+            div.appendChild(loadingContainer);
+
             div.style.display = 'block';
             setTimeout(() => div.style.opacity = '1', 10);
+            isPopupOpen = true;
             return;
         }
 
@@ -80,7 +163,7 @@
         header.style.display = 'flex';
         header.style.justifyContent = 'space-between';
         header.style.alignItems = 'center';
-        header.style.padding = '10px 15px';
+        header.style.padding = '12px 15px';
         header.style.borderBottom = '1px solid #444';
         header.style.background = 'linear-gradient(to right, #1a1a2e, #16213e)';
         header.style.position = 'sticky';
@@ -88,24 +171,31 @@
         header.style.zIndex = '1';
 
         const title = document.createElement('h2');
-        title.innerHTML = `<span style="color: #eee;">TrenchRadar:</span> <span style="color: #4fc3f7;">$${data.tokenTicker}</span>`;
+        title.innerHTML = `<span style="color: #eee; font-weight: 600;">TrenchRadar:</span> <span style="color: #4fc3f7; font-weight: 700;">$${data.tokenTicker}</span>`;
         title.style.margin = '0';
-        title.style.fontSize = '16px';
+        title.style.fontSize = '18px'; // Увеличенный размер шрифта
         title.style.fontWeight = '600';
 
         const closeBtn = document.createElement('div');
         closeBtn.innerHTML = '&times;';
         closeBtn.style.cursor = 'pointer';
-        closeBtn.style.fontSize = '26px'; // Увеличен размер крестика
+        closeBtn.style.fontSize = '28px';
         closeBtn.style.color = '#ddd';
-        closeBtn.style.width = '30px';
-        closeBtn.style.height = '30px';
+        closeBtn.style.width = '32px';
+        closeBtn.style.height = '32px';
         closeBtn.style.display = 'flex';
         closeBtn.style.alignItems = 'center';
         closeBtn.style.justifyContent = 'center';
-        closeBtn.style.transition = 'color 0.2s';
-        closeBtn.addEventListener('mouseover', () => closeBtn.style.color = '#fff');
-        closeBtn.addEventListener('mouseout', () => closeBtn.style.color = '#ddd');
+        closeBtn.style.transition = 'all 0.2s';
+        closeBtn.style.borderRadius = '4px';
+        closeBtn.addEventListener('mouseover', () => {
+            closeBtn.style.color = '#fff';
+            closeBtn.style.backgroundColor = 'rgba(255,255,255,0.1)';
+        });
+        closeBtn.addEventListener('mouseout', () => {
+            closeBtn.style.color = '#ddd';
+            closeBtn.style.backgroundColor = 'transparent';
+        });
         closeBtn.addEventListener('click', closeInfoPopup);
 
         header.appendChild(title);
@@ -118,19 +208,19 @@
         overallSection.style.borderBottom = '1px solid #444';
 
         const overallTitle = document.createElement('h3');
-        overallTitle.innerHTML = '📊 <span style="border-bottom: 1px dashed #666; padding-bottom: 3px;">Overall Statistics</span>';
+        overallTitle.innerHTML = '📊 <span style="border-bottom: 1px dashed #666; padding-bottom: 3px; font-weight: 600;">Overall Statistics</span>';
         overallTitle.style.marginTop = '3px';
         overallTitle.style.marginBottom = '8px';
-        overallTitle.style.fontSize = '15px';
+        overallTitle.style.fontSize = '16px';
         overallTitle.style.color = '#ffb74d';
+        overallTitle.style.fontWeight = '600';
 
         overallSection.appendChild(overallTitle);
 
         const stats = [
-            { icon: '📦', label: 'Holding Bundles', value: data.overall.holdingBundles + ' (Holding) / ' + data.overall.totalBundles + ' (Total)', color: '#f15974' },
-            // { icon: '📦', label: 'Total Bundles', value: data.overall.totalBundles, color: '#ba68c8' },
-            { icon: '💰', label: 'Total SOL Spent', value: data.overall.totalSol + ' SOL', color: '#fff' },
-            { icon: '📈', label: 'Current Held Percentage', value: data.overall.totalHolding + '%', color: '#f15974' }
+            { icon: '📦', label: 'Holding Bundles', value: data.overall.holdingBundles + ' (Holding) / ' + data.overall.totalBundles + ' (Total)', color: '#f15974', fontWeight: '600' },
+            { icon: '💰', label: 'Total SOL Spent', value: data.overall.totalSol + ' SOL', color: '#fff', fontWeight: '600' },
+            { icon: '📈', label: 'Current Held Percentage', value: data.overall.totalHolding + '%', color: '#f15974', fontWeight: '600' }
         ];
 
         stats.forEach(stat => {
@@ -145,6 +235,7 @@
             labelDiv.style.display = 'flex';
             labelDiv.style.alignItems = 'center';
             labelDiv.style.gap = '8px';
+            labelDiv.style.fontWeight = '500';
 
             const iconSpan = document.createElement('span');
             iconSpan.textContent = stat.icon;
@@ -152,13 +243,14 @@
 
             const textSpan = document.createElement('span');
             textSpan.textContent = stat.label;
+            textSpan.style.fontWeight = '500';
 
             labelDiv.appendChild(iconSpan);
             labelDiv.appendChild(textSpan);
 
             const valueDiv = document.createElement('div');
             valueDiv.textContent = stat.value;
-            valueDiv.style.fontWeight = '600';
+            valueDiv.style.fontWeight = stat.fontWeight || '600';
             valueDiv.style.color = stat.color;
             valueDiv.style.fontSize = '14px';
 
@@ -174,11 +266,12 @@
         topSection.style.padding = '15px';
 
         const topTitle = document.createElement('h3');
-        topTitle.innerHTML = '🏆 <span style="border-bottom: 1px dashed #666; padding-bottom: 3px;">Top 5 Holding Bundles</span>';
+        topTitle.innerHTML = '🏆 <span style="border-bottom: 1px dashed #666; padding-bottom: 3px; font-weight: 600;">Top 5 Holding Bundles</span>';
         topTitle.style.marginTop = '0';
         topTitle.style.marginBottom = '15px';
-        topTitle.style.fontSize = '15px';
+        topTitle.style.fontSize = '16px';
         topTitle.style.color = '#ffb74d';
+        topTitle.style.fontWeight = '600';
 
         topSection.appendChild(topTitle);
 
@@ -236,15 +329,15 @@
                 categorySpan.style.padding = '3px 20px';
                 categorySpan.style.borderRadius = '10px';
                 categorySpan.style.fontSize = '14px';
+                categorySpan.style.fontWeight = '600';
                 bundleHeader.appendChild(categorySpan);
 
                 bundleCard.appendChild(bundleHeader);
 
                 const bundleStats = [
-                    { icon: '👥', label: 'Unique Wallets', value: bundle.uniqueWallets },
-                    { icon: '📊', label: '% of Supply', value: bundle.tokenPercentage + '%' },
-                    { icon: '💸', label: 'SOL Spent', value: bundle.solSpent + ' SOL' },
-                    { icon: '📌', label: 'Holding', value: bundle.holdingPercentage + '%' }
+                    { icon: '👥', label: 'Unique Wallets', value: bundle.uniqueWallets, fontWeight: '600' },
+                    { icon: '💸', label: 'SOL Spent', value: bundle.solSpent + ' SOL', fontWeight: '600' },
+                    { icon: '📌', label: 'Remaining Supply', value: bundle.holdingPercentage + '%', fontWeight: '600' }
                 ];
 
                 bundleStats.forEach(stat => {
@@ -259,6 +352,7 @@
                     labelDiv.style.alignItems = 'center';
                     labelDiv.style.gap = '6px';
                     labelDiv.style.color = '#aaa';
+                    labelDiv.style.fontWeight = '500';
 
                     const iconSpan = document.createElement('span');
                     iconSpan.textContent = stat.icon;
@@ -271,13 +365,48 @@
 
                     const valueDiv = document.createElement('div');
                     valueDiv.textContent = stat.value;
-                    valueDiv.style.fontWeight = '500';
+                    valueDiv.style.fontWeight = stat.fontWeight || '600';
                     valueDiv.style.color = '#fff';
 
                     statRow.appendChild(labelDiv);
                     statRow.appendChild(valueDiv);
                     bundleCard.appendChild(statRow);
                 });
+
+                // Индикатор прогресса
+                const progressContainer = document.createElement('div');
+                progressContainer.style.position = 'relative';
+                progressContainer.style.width = '100%';
+                progressContainer.style.height = '24px';
+                progressContainer.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                progressContainer.style.borderRadius = '4px';
+                progressContainer.style.marginTop = '10px';
+                progressContainer.style.overflow = 'hidden';
+
+                const progressBar = document.createElement('div');
+                progressBar.style.width = Math.min(100, bundle.remainingBundlePercent) + '%';
+                progressBar.style.height = '100%';
+                progressBar.style.background = 'linear-gradient(to right, #4a00e0, #8e2de2)';
+                progressBar.style.borderRadius = '4px';
+
+                const progressText = document.createElement('div');
+                progressText.textContent = `Remaining Bundle: ${bundle.remainingBundlePercent.toFixed(4)}%`;
+                progressText.style.position = 'absolute';
+                progressText.style.top = '0';
+                progressText.style.left = '0';
+                progressText.style.width = '100%';
+                progressText.style.height = '100%';
+                progressText.style.display = 'flex';
+                progressText.style.alignItems = 'center';
+                progressText.style.justifyContent = 'center';
+                progressText.style.fontSize = '12px';
+                progressText.style.fontWeight = '600';
+                progressText.style.color = '#fff';
+                progressText.style.textShadow = '0px 0px 3px rgba(0,0,0,0.8)';
+
+                progressContainer.appendChild(progressBar);
+                progressContainer.appendChild(progressText);
+                bundleCard.appendChild(progressContainer);
 
                 topSection.appendChild(bundleCard);
             });
@@ -292,18 +421,28 @@
         footer.style.fontSize = '11px';
         footer.style.color = '#666';
         footer.style.borderTop = '1px solid #333';
-        footer.textContent = 'Data provided by TrenchRadar • v1.8.1';
+        footer.textContent = 'Data provided by TrenchRadar • v1.9.4';
         div.appendChild(footer);
 
         div.style.display = 'block';
         setTimeout(() => div.style.opacity = '1', 10);
+        isPopupOpen = true;
+
+        // Добавляем отслеживание изменений URL
+        window.addEventListener('hashchange', handleUrlChange);
+        window.addEventListener('popstate', handleUrlChange);
     }
 
     function fetchTrenchBotBundles(tokenAddress) {
         GM_cookie.list({ domain: 'trench.bot' }, function(cookies) {
             const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ');
 
-            GM_xmlhttpRequest({
+            // Отменяем предыдущий запрос, если он существует
+            if (activeTrenchRequest) {
+                activeTrenchRequest.abort();
+            }
+
+            activeTrenchRequest = GM_xmlhttpRequest({
                 method: 'GET',
                 url: `https://trench.bot/api/bundle/bundle_full/${tokenAddress}`,
                 headers: {
@@ -314,6 +453,9 @@
                     'cookie': cookieStr
                 },
                 onload: (resp) => {
+                    // Проверяем, открыт ли еще попап
+                    if (!isPopupOpen) return;
+
                     console.log(`🟢 TrenchBot API статус: ${resp.status}`);
                     if (resp.status !== 200) {
                         createOrUpdateInfo(`TrenchBot API error: status ${resp.status}`);
@@ -331,11 +473,18 @@
                         const totalHolding = Object.values(data.bundles).reduce((sum, b) => sum + b.holding_percentage, 0);
 
                         const holdingBundles = Object.entries(data.bundles)
-                            .map(([id, b]) => ({
-                                id,
-                                ...b,
-                                primary_category: b.bundle_analysis.primary_category
-                            }))
+                            .map(([id, b]) => {
+                                const remainingBundlePercent = b.total_tokens > 0
+                                    ? (b.holding_amount / b.total_tokens * 100)
+                                    : 0;
+
+                                return {
+                                    id,
+                                    ...b,
+                                    primary_category: b.bundle_analysis.primary_category,
+                                    remainingBundlePercent: remainingBundlePercent
+                                };
+                            })
                             .filter(b => b.holding_percentage > 0);
 
                         const topHoldingBundles = holdingBundles
@@ -356,7 +505,8 @@
                                 primaryCategory: b.primary_category,
                                 tokenPercentage: b.token_percentage.toFixed(4),
                                 solSpent: b.total_sol.toFixed(2),
-                                holdingPercentage: b.holding_percentage.toFixed(4)
+                                holdingPercentage: b.holding_percentage.toFixed(4),
+                                remainingBundlePercent: b.remainingBundlePercent
                             }))
                         };
 
@@ -367,6 +517,9 @@
                     }
                 },
                 onerror: (resp) => {
+                    // Проверяем, открыт ли еще попап
+                    if (!isPopupOpen) return;
+
                     console.error('🔴 Network error:', resp);
                     createOrUpdateInfo('Network request failed');
                 }
@@ -374,20 +527,13 @@
         });
     }
 
-    function formatNumber(num) {
-        if (num === undefined || num === null) return 'N/A';
-        if (num >= 1_000_000) return (num / 1_000_000).toFixed(2) + ' million';
-        if (num >= 1_000) return (num / 1_000).toFixed(2) + ' thousand';
-        return num.toString();
-    }
-
-    function formatPercent(num) {
-        if (num === undefined || num === null) return 'N/A';
-        return Number(num).toFixed(4) + '%';
-    }
-
     function getFullTokenAddress(pairAddress, cb) {
-        GM_xmlhttpRequest({
+        // Отменяем предыдущий запрос, если он существует
+        if (activeAxiomRequest) {
+            activeAxiomRequest.abort();
+        }
+
+        activeAxiomRequest = GM_xmlhttpRequest({
             method: 'GET',
             url: `https://api3.axiom.trade/clipboard-pair-info?address=${pairAddress}`,
             headers: {
@@ -397,6 +543,9 @@
                 'user-agent': navigator.userAgent
             },
             onload: (resp) => {
+                // Проверяем, открыт ли еще попап
+                if (!isPopupOpen) return;
+
                 console.log(`🟢 Axiom API status: ${resp.status}`);
                 try {
                     const data = JSON.parse(resp.responseText);
@@ -410,6 +559,9 @@
                 }
             },
             onerror: (resp) => {
+                // Проверяем, открыт ли еще попап
+                if (!isPopupOpen) return;
+
                 console.error('🔴 Network error:', resp);
                 createOrUpdateInfo('Network request failed');
             }
@@ -428,17 +580,25 @@
             createOrUpdateInfo('Pair not found in URL');
             return;
         }
-        createOrUpdateInfo(`Found pair: ${pairAddress}\nFetching token address...`);
+
+        // Показываем индикатор загрузки вместо текстовых сообщений
+        createOrUpdateInfo("Fetching token address...");
+
         getFullTokenAddress(pairAddress, (fullAddr) => {
             if (!fullAddr) return;
-            createOrUpdateInfo(`Found token address: ${fullAddr}\nFetching bundles...`);
+
+            // Проверяем, открыт ли еще попап
+            if (!isPopupOpen) return;
+
+            // Показываем индикатор загрузки для запроса бандлов
+            createOrUpdateInfo("Fetching bundles...");
+
             fetchTrenchBotBundles(fullAddr);
         });
     }
 
     // Вставка кнопки в навигационную панель
     function insertButton() {
-        // Найдем навигационный контейнер по точному совпадению класса
         const navElement = document.querySelector('.border-b.border-primaryStroke.overflow-hidden.flex.flex-row.w-full.h-\\[52px\\].sm\\:h-\\[64px\\].min-h-\\[48px\\].sm\\:min-h-\\[64px\\].px-\\[16px\\].sm\\:px-\\[16px\\].lg\\:px-\\[24px\\].gap-\\[16px\\].sm\\:gap-\\[16px\\].lg\\:gap-\\[24px\\].justify-between.sm\\:justify-start.items-center');
 
         if (!navElement) {
@@ -449,7 +609,7 @@
         // Создаем кнопку
         const checkBtn = document.createElement('button');
         checkBtn.textContent = 'Check Bundles';
-        checkBtn.id = 'trench-check-btn'; // Добавляем ID для позиционирования
+        checkBtn.id = 'trench-check-btn';
         Object.assign(checkBtn.style, {
             padding: '6px 12px',
             fontSize: '14px',
@@ -477,14 +637,10 @@
             }
         });
 
-        // Найдем контейнер с кнопками справа
         const rightSection = navElement.querySelector('.hidden.sm\\:flex.items-center.gap-\\[8px\\].lg\\:gap-\\[16px\\]');
-
         if (rightSection) {
-            // Вставляем перед первым элементом в правой секции
             rightSection.insertBefore(checkBtn, rightSection.firstChild);
         } else {
-            // Fallback: вставляем в конец навигационного контейнера
             navElement.appendChild(checkBtn);
         }
     }
@@ -494,12 +650,20 @@
         const navElement = document.querySelector('.border-b.border-primaryStroke');
         if (navElement) {
             observer.disconnect();
-            setTimeout(insertButton, 500); // Дадим время на полную инициализацию интерфейса
+            setTimeout(insertButton, 500);
         }
     });
 
     observer.observe(document, {
         childList: true,
         subtree: true
+    });
+
+    // Закрытие попапа при клике в любое место страницы
+    document.addEventListener('click', function(event) {
+        const infoDiv = document.getElementById('trench-info-div');
+        if (infoDiv && infoDiv.style.display !== 'none' && event.target !== document.getElementById('trench-check-btn')) {
+            closeInfoPopup();
+        }
     });
 })();
