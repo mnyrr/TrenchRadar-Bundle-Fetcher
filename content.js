@@ -66,18 +66,12 @@
             div.innerHTML = '';
         }
 
-        // Правильное позиционирование попапа под кнопкой (центрирование)
-        if (button) {
-            const rect = button.getBoundingClientRect();
-            const popupWidth = 380;
-            const leftPosition = rect.left + window.scrollX + (rect.width / 2) - (popupWidth / 2);
-            
-            div.style.top = (rect.bottom + window.scrollY + 10) + 'px';
-            div.style.left = Math.max(10, leftPosition) + 'px';
-        } else {
-            div.style.top = '60px';
-            div.style.right = '15px';
-        }
+            // Фиксированное позиционирование в правом верхнем углу
+            div.style.position = 'fixed';
+            div.style.top = '40px';
+            div.style.right = '20px';
+            div.style.left = 'auto';
+            div.style.bottom = 'auto';
 
         if (typeof data === 'string') {
             // Стильный индикатор загрузки
@@ -578,89 +572,115 @@ if (data.topBundles.length === 0) {
     }
 
     function init() {
-        const pairAddress = getPairAddressFromURL();
-        if (!pairAddress) {
-            createOrUpdateInfo('Pair not found in URL');
-            return;
-        }
-        
-        // Показываем индикатор загрузки вместо текстовых сообщений
-        createOrUpdateInfo("Fetching token address...");
-        
-        getFullTokenAddress(pairAddress, (fullAddr) => {
-            if (!fullAddr) return;
-            
-            // Проверяем, открыт ли еще попап
-            if (!isPopupOpen) return;
-            
-            // Показываем индикатор загрузки для запроса бандлов
-            createOrUpdateInfo("Fetching bundles...");
-            
-            fetchTrenchBotBundles(fullAddr);
-        });
+    const pairAddress = getPairAddressFromURL();
+
+    if (!pairAddress) {
+        // Показываем только сообщение об ошибке, индикатор загрузки не нужен
+        createOrUpdateInfo('Pair not found in URL', true); // true — например, может означать статус ошибки
+        return;
     }
 
-    // Вставка кнопки в навигационную панель
+    // Показываем индикатор загрузки
+    createOrUpdateInfo("Fetching token address...");
+
+    getFullTokenAddress(pairAddress, (fullAddr) => {
+        if (!fullAddr) {
+            createOrUpdateInfo("Token address not found");
+            return;
+        }
+
+        if (!isPopupOpen) return;
+
+        createOrUpdateInfo("Fetching bundles...");
+
+        fetchTrenchBotBundles(fullAddr);
+    });
+}
+
+
+    // Новая функция вставки кнопки в контейнер статистики
     function insertButton() {
-        const navElement = document.querySelector('.border-b.border-primaryStroke.overflow-hidden.flex.flex-row.w-full.h-\\[52px\\].sm\\:h-\\[64px\\].min-h-\\[48px\\].sm\\:min-h-\\[64px\\].px-\\[16px\\].sm\\:px-\\[16px\\].lg\\:px-\\[24px\\].gap-\\[16px\\].sm\\:gap-\\[16px\\].lg\\:gap-\\[24px\\].justify-between.sm\\:justify-start.items-center');
-
-        if (!navElement) {
-            console.error('Nav element not found');
-            return;
-        }
-
-        // Создаем кнопку
-        const checkBtn = document.createElement('button');
-        checkBtn.textContent = 'Check Bundles';
-        checkBtn.id = 'trench-check-btn';
-        Object.assign(checkBtn.style, {
-            padding: '6px 12px',
-            fontSize: '14px',
-            cursor: 'pointer',
-            borderRadius: '100px',
-            border: 'none',
-            background: 'linear-gradient(to right, #6a11cb, #2575fc)',
-            color: 'white',
-            fontWeight: 'bold',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-            transition: 'all 0.2s ease',
-            height: '32px',
-            flexShrink: '0',
-            marginLeft: '8px'
-        });
-
-        // Обработчик клика
-        checkBtn.addEventListener('click', (event) => {
-            event.stopPropagation();
-            const infoDiv = document.getElementById('trench-info-div');
-            if (!infoDiv || infoDiv.style.display === 'none') {
-                init();
-            } else {
-                closeInfoPopup();
-            }
-        });
-
-        const rightSection = navElement.querySelector('.hidden.sm\\:flex.items-center.gap-\\[8px\\].lg\\:gap-\\[16px\\]');
-        if (rightSection) {
-            rightSection.insertBefore(checkBtn, rightSection.firstChild);
-        } else {
-            navElement.appendChild(checkBtn);
-        }
+    // Находим контейнер статистики по более надёжному селектору
+    const statsContainer = document.querySelector('div.flex.flex-col.flex-1.gap-\\[16px\\].p-\\[16px\\].pt-\\[4px\\].min-h-\\[0px\\]');
+    
+    if (!statsContainer) {
+        console.log('Stats container not found');
+        return;
     }
 
-    // Вставляем кнопку при загрузке страницы
-    const observer = new MutationObserver((mutations) => {
-        const navElement = document.querySelector('.border-b.border-primaryStroke');
-        if (navElement) {
-            observer.disconnect();
-            setTimeout(insertButton, 500);
+    // Создаем кнопку
+    const checkBtn = document.createElement('button');
+    checkBtn.textContent = 'Check Bundles';
+    checkBtn.id = 'trench-check-btn';
+    Object.assign(checkBtn.style, {
+        width: '100%',
+        padding: '10px 0',
+        fontSize: '14px',
+        cursor: 'pointer',
+        borderRadius: '8px',
+        border: 'none',
+        background: 'linear-gradient(to right, #6a11cb, #2575fc)',
+        color: 'white',
+        fontWeight: 'bold',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+        transition: 'all 0.2s ease',
+        margin: '0 0 4px 0',
+        textAlign: 'center'
+    });
+
+    // Добавляем эффекты при наведении
+    checkBtn.addEventListener('mouseenter', () => {
+        checkBtn.style.transform = 'translateY(-1px)';
+        checkBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+    });
+    
+    checkBtn.addEventListener('mouseleave', () => {
+        checkBtn.style.transform = 'translateY(0)';
+        checkBtn.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+    });
+
+    // Обработчик клика
+    checkBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const infoDiv = document.getElementById('trench-info-div');
+        if (!infoDiv || infoDiv.style.display === 'none') {
+            init();
+        } else {
+            closeInfoPopup();
         }
     });
 
-    observer.observe(document, {
-        childList: true,
-        subtree: true
-    });
+    // Вставляем кнопку после второго ряда статистики
+    if (statsContainer.children.length >= 8) {
+        // Вставляем после второго элемента (индекс 1)
+        statsContainer.insertBefore(checkBtn, statsContainer.children[8]);
+    } else {
+        // Если структура неожиданная, добавляем в начало
+        statsContainer.prepend(checkBtn);
+    }
+}
+
+// Вставляем кнопку при загрузке страницы с улучшенным наблюдателем
+const observer = new MutationObserver((mutations) => {
+    const statsContainer = document.querySelector('div.flex.flex-col.flex-1.gap-\\[16px\\].p-\\[16px\\].pt-\\[4px\\].min-h-\\[0px\\]');
+    if (statsContainer) {
+        // Проверяем, не добавлена ли уже кнопка
+        if (!document.getElementById('trench-check-btn')) {
+            try {
+                insertButton();
+            } catch (e) {
+                console.error('Error inserting button:', e);
+            }
+        }
+    }
+});
+
+observer.observe(document, {
+    childList: true,
+    subtree: true,
+    attributes: false,
+    characterData: false
+});
     
     // Закрытие попапа при клике в любое место страницы
     document.addEventListener('click', function(event) {
