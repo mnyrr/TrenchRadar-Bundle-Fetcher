@@ -23,7 +23,7 @@
     {
       "matches": [
         "https://axiom.trade/*",
-        "https://nova.trade/token/*"
+        "https://nova.trade/*"
       ],
       "js": ["content.js"],
       "run_at": "document_end"
