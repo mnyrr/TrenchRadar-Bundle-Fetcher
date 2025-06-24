@@ -12,7 +12,8 @@
   "host_permissions": [
     "https://axiom.trade/*",
     "https://trench.bot/*",
-    "https://api3.axiom.trade/*"
+    "https://api3.axiom.trade/*",
+    "https://nova.trade/*"
   ],
   "background": {
     "service_worker": "background.js",
@@ -20,14 +21,17 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://axiom.trade/*"],
+      "matches": [
+        "https://axiom.trade/*",
+        "https://nova.trade/token/*"
+      ],
       "js": ["content.js"],
       "run_at": "document_end"
     }
   ],
   "icons": {
-    "16": "icon16.png",
-    "48": "icon48.png",
-    "128": "icon128.png"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 }
