@@ -570,102 +570,205 @@ if (data.topBundles.length === 0) {
         const match = url.match(/\/meme\/([^/?#]+)/);
         return match ? match[1] : null;
     }
-
-    function init() {
-    const pairAddress = getPairAddressFromURL();
-
-    if (!pairAddress) {
-        // Показываем только сообщение об ошибке, индикатор загрузки не нужен
-        createOrUpdateInfo('Pair not found in URL', true); // true — например, может означать статус ошибки
-        return;
+    
+    // Новая функция для определения текущего сайта
+    function getCurrentSite() {
+        if (window.location.hostname.includes('axiom.trade')) {
+            return 'axiom';
+        } else if (window.location.hostname.includes('nova.trade')) {
+            return 'nova';
+        }
+        return null;
     }
 
-    // Показываем индикатор загрузки
-    createOrUpdateInfo("Fetching token address...");
+    function init() {
+        const site = getCurrentSite();
+        let tokenAddress = null;
 
-    getFullTokenAddress(pairAddress, (fullAddr) => {
-        if (!fullAddr) {
-            createOrUpdateInfo("Token address not found");
-            return;
+        if (site === 'axiom') {
+            const pairAddress = getPairAddressFromURL();
+
+            if (!pairAddress) {
+                createOrUpdateInfo('Pair not found in URL');
+                return;
+            }
+
+            createOrUpdateInfo("Fetching token address...");
+
+            getFullTokenAddress(pairAddress, (fullAddr) => {
+                if (!fullAddr) {
+                    createOrUpdateInfo("Token address not found");
+                    return;
+                }
+
+                if (!isPopupOpen) return;
+
+                createOrUpdateInfo("Fetching bundles...");
+                fetchTrenchBotBundles(fullAddr);
+            });
+        } 
+        else if (site === 'nova') {
+            // Извлекаем адрес токена из URL
+            const url = window.location.href;
+            const match = url.match(/nova\.trade\/token\/([^/?#]+)/);
+            
+            if (!match) {
+                createOrUpdateInfo('Token address not found in URL');
+                return;
+            }
+            
+            tokenAddress = match[1];
+            createOrUpdateInfo("Fetching bundles...");
+            fetchTrenchBotBundles(tokenAddress);
         }
-
-        if (!isPopupOpen) return;
-
-        createOrUpdateInfo("Fetching bundles...");
-
-        fetchTrenchBotBundles(fullAddr);
-    });
-}
-
+    }
 
     // Новая функция вставки кнопки в контейнер статистики
     function insertButton() {
-    // Находим контейнер статистики по более надёжному селектору
-    const statsContainer = document.querySelector('div.flex.flex-col.flex-1.gap-\\[16px\\].p-\\[16px\\].pt-\\[4px\\].min-h-\\[0px\\]');
-    
-    if (!statsContainer) {
-        console.log('Stats container not found');
-        return;
-    }
+        const site = getCurrentSite();
+        
+        // Для axiom.trade - существующая логика
+        if (site === 'axiom') {
+            // Находим контейнер статистики по более надёжному селектору
+            const statsContainer = document.querySelector('div.flex.flex-col.flex-1.gap-\\[16px\\].p-\\[16px\\].pt-\\[4px\\].min-h-\\[0px\\]');
+            
+            if (!statsContainer) {
+                console.log('Stats container not found');
+                return;
+            }
 
-    // Создаем кнопку
-    const checkBtn = document.createElement('button');
-    checkBtn.textContent = 'Check Bundles';
-    checkBtn.id = 'trench-check-btn';
-    Object.assign(checkBtn.style, {
-        width: '100%',
-        padding: '10px 0',
-        fontSize: '14px',
-        cursor: 'pointer',
-        borderRadius: '8px',
-        border: 'none',
-        background: 'linear-gradient(to right, #6a11cb, #2575fc)',
-        color: 'white',
-        fontWeight: 'bold',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-        transition: 'all 0.2s ease',
-        margin: '0 0 4px 0',
-        textAlign: 'center'
-    });
+            // Создаем кнопку
+            const checkBtn = document.createElement('button');
+            checkBtn.textContent = 'Check Bundles';
+            checkBtn.id = 'trench-check-btn';
+            Object.assign(checkBtn.style, {
+                width: '100%',
+                padding: '10px 0',
+                fontSize: '14px',
+                cursor: 'pointer',
+                borderRadius: '8px',
+                border: 'none',
+                background: 'linear-gradient(to right, #6a11cb, #2575fc)',
+                color: 'white',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                transition: 'all 0.2s ease',
+                margin: '0 0 4px 0',
+                textAlign: 'center'
+            });
 
-    // Добавляем эффекты при наведении
-    checkBtn.addEventListener('mouseenter', () => {
-        checkBtn.style.transform = 'translateY(-1px)';
-        checkBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-    });
-    
-    checkBtn.addEventListener('mouseleave', () => {
-        checkBtn.style.transform = 'translateY(0)';
-        checkBtn.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
-    });
+            // Добавляем эффекты при наведении
+            checkBtn.addEventListener('mouseenter', () => {
+                checkBtn.style.transform = 'translateY(-1px)';
+                checkBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+            });
+            
+            checkBtn.addEventListener('mouseleave', () => {
+                checkBtn.style.transform = 'translateY(0)';
+                checkBtn.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+            });
 
-    // Обработчик клика
-    checkBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const infoDiv = document.getElementById('trench-info-div');
-        if (!infoDiv || infoDiv.style.display === 'none') {
-            init();
-        } else {
-            closeInfoPopup();
+            // Обработчик клика
+            checkBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const infoDiv = document.getElementById('trench-info-div');
+                if (!infoDiv || infoDiv.style.display === 'none') {
+                    init();
+                } else {
+                    closeInfoPopup();
+                }
+            });
+
+            // Вставляем кнопку после второго ряда статистики
+            if (statsContainer.children.length >= 8) {
+                // Вставляем после второго элемента (индекс 1)
+                statsContainer.insertBefore(checkBtn, statsContainer.children[8]);
+            } else {
+                // Если структура неожиданная, добавляем в начало
+                statsContainer.prepend(checkBtn);
+            }
+        } 
+        // Для nova.trade - новая логика
+        else if (site === 'nova') {
+            // Находим целевой элемент
+            const targetElement = document.querySelector('div.flex.h-\\[42px\\].w-full.items-center.justify-between.py-3.md\\:h-\\[34px\\]');
+            
+            if (!targetElement) {
+                console.log('Target element not found on nova.trade');
+                return;
+            }
+
+            // Создаем контейнер для кнопки
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'w-full mb-2';
+            buttonContainer.style.marginBottom = '16px';
+
+            // Создаем кнопку
+            const checkBtn = document.createElement('button');
+            checkBtn.textContent = 'Check Bundles';
+            checkBtn.id = 'trench-check-btn';
+            Object.assign(checkBtn.style, {
+                width: '100%',
+                padding: '10px 0',
+                fontSize: '14px',
+                cursor: 'pointer',
+                borderRadius: '8px',
+                border: 'none',
+                background: 'linear-gradient(to right, #6a11cb, #2575fc)',
+                color: 'white',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                transition: 'all 0.2s ease',
+                textAlign: 'center'
+            });
+
+            // Эффекты при наведении
+            checkBtn.addEventListener('mouseenter', () => {
+                checkBtn.style.transform = 'translateY(-1px)';
+                checkBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+            });
+            
+            checkBtn.addEventListener('mouseleave', () => {
+                checkBtn.style.transform = 'translateY(0)';
+                checkBtn.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+            });
+
+            // Обработчик клика
+            checkBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const infoDiv = document.getElementById('trench-info-div');
+                if (!infoDiv || infoDiv.style.display === 'none') {
+                    init();
+                } else {
+                    closeInfoPopup();
+                }
+            });
+
+            // Добавляем кнопку в контейнер
+            buttonContainer.appendChild(checkBtn);
+            
+            // Вставляем контейнер перед целевым элементом
+            targetElement.parentNode.insertBefore(buttonContainer, targetElement);
         }
-    });
-
-    // Вставляем кнопку после второго ряда статистики
-    if (statsContainer.children.length >= 8) {
-        // Вставляем после второго элемента (индекс 1)
-        statsContainer.insertBefore(checkBtn, statsContainer.children[8]);
-    } else {
-        // Если структура неожиданная, добавляем в начало
-        statsContainer.prepend(checkBtn);
     }
-}
 
 // Вставляем кнопку при загрузке страницы с улучшенным наблюдателем
 const observer = new MutationObserver((mutations) => {
-    const statsContainer = document.querySelector('div.flex.flex-col.flex-1.gap-\\[16px\\].p-\\[16px\\].pt-\\[4px\\].min-h-\\[0px\\]');
-    if (statsContainer) {
-        // Проверяем, не добавлена ли уже кнопка
-        if (!document.getElementById('trench-check-btn')) {
+    // Для nova.trade
+    if (getCurrentSite() === 'nova') {
+        const targetElement = document.querySelector('div.flex.h-\\[42px\\].w-full.items-center.justify-between.py-3.md\\:h-\\[34px\\]');
+        if (targetElement && !document.getElementById('trench-check-btn')) {
+            try {
+                insertButton();
+            } catch (e) {
+                console.error('Error inserting button:', e);
+            }
+        }
+    }
+    // Для axiom.trade
+    else if (getCurrentSite() === 'axiom') {
+        const statsContainer = document.querySelector('div.flex.flex-col.flex-1.gap-\\[16px\\].p-\\[16px\\].pt-\\[4px\\].min-h-\\[0px\\]');
+        if (statsContainer && !document.getElementById('trench-check-btn')) {
             try {
                 insertButton();
             } catch (e) {
