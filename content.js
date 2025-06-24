@@ -701,7 +701,8 @@ if (data.topBundles.length === 0) {
             // Создаем контейнер для кнопки
             const buttonContainer = document.createElement('div');
             buttonContainer.className = 'w-full mb-2';
-            buttonContainer.style.marginBottom = '16px';
+            buttonContainer.style.marginTop = '8px';
+            buttonContainer.style.marginBottom = '8px';
 
             // Создаем кнопку
             const checkBtn = document.createElement('button');
