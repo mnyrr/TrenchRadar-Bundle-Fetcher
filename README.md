@@ -10,7 +10,7 @@
 
 ## 🛠 Installation Methods
 
-### Option 1: Install as Chrome Extension (Recommended)
+### Option 1: Install as Chrome Extension (Recommended) (Axiom and Nova)
 
 #### Step-by-Step Guide:
 
@@ -45,7 +45,7 @@
 - Navigate to `https://axiom.trade/meme/[token-address]`
 - Click the "Check Bundles" button that appears in the navigation bar
 
-### Option 2: Install as Tampermonkey Userscript
+### Option 2: Install as Tampermonkey Userscript (only Axiom)
 
 #### Step-by-Step Guide:
 
