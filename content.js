@@ -5,6 +5,7 @@
     // Переменные для отслеживания активных запросов
     let activeRequests = [];
     let isPopupOpen = false;
+    let currentTokenAddress = null;
 
     // Функция для закрытия попапа
     function closeInfoPopup() {
@@ -29,6 +30,23 @@
         closeInfoPopup();
     }
 
+    // Функции для управления оверлеем
+    function showOverlay() {
+        const overlay = document.getElementById('trench-overlay');
+        if (overlay) {
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.style.opacity = '1', 10);
+        }
+    }
+
+    function hideOverlay() {
+        const overlay = document.getElementById('trench-overlay');
+        if (overlay) {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 300);
+        }
+    }
+
     function createOrUpdateInfo(data) {
         let div = document.getElementById('trench-info-div');
         const button = document.getElementById('trench-check-btn');
@@ -38,80 +56,77 @@
             div.id = 'trench-info-div';
             Object.assign(div.style, {
                 position: 'fixed',
-                width: '380px',
+                width: '342px', // Уменьшено на 10%
                 maxHeight: '90vh',
                 overflowY: 'auto',
                 padding: '0',
                 backgroundColor: 'rgba(33,33,33,0.98)',
                 color: 'white',
-                fontSize: '14px',
+                fontSize: '12.6px', // Уменьшено на 10%
                 fontWeight: '500',
                 borderRadius: '6px',
                 zIndex: '99999',
                 cursor: 'default',
                 display: 'none',
                 fontFamily: "'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
-                boxShadow: '0 4px 20px rgba(0,0,0,0.7)',
-                border: '2px solid rgba(139, 101, 255, 0.3)',
-                outline: '2px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 4px 18px rgba(0,0,0,0.63)', // Уменьшено на 10%
+                border: '1.8px solid rgba(139, 101, 255, 0.27)', // Уменьшено на 10%
+                outline: '1.8px solid rgba(255, 255, 255, 0.09)', // Уменьшено на 10%
                 opacity: '0',
                 transition: 'opacity 0.3s ease'
             });
-            
-            // Закрытие попапа при клике на него
-            div.addEventListener('click', closeInfoPopup);
             
             document.body.appendChild(div);
         } else {
             div.innerHTML = '';
         }
 
-            // Фиксированное позиционирование в правом верхнем углу
-            div.style.position = 'fixed';
-            div.style.top = '40px';
-            div.style.right = '20px';
-            div.style.left = 'auto';
-            div.style.bottom = 'auto';
+        // Фиксированное позиционирование в правом верхнем углу
+        div.style.position = 'fixed';
+        div.style.top = '36px'; // Уменьшено на 10%
+        div.style.right = '18px'; // Уменьшено на 10%
+        div.style.left = 'auto';
+        div.style.bottom = 'auto';
 
         if (typeof data === 'string') {
             // Стильный индикатор загрузки
             const loadingContainer = document.createElement('div');
-            loadingContainer.style.padding = '30px 20px';
+            loadingContainer.style.padding = '27px 18px'; // Уменьшено на 10%
             loadingContainer.style.textAlign = 'center';
             
             const spinnerContainer = document.createElement('div');
             spinnerContainer.style.display = 'inline-block';
             spinnerContainer.style.position = 'relative';
-            spinnerContainer.style.width = '80px';
-            spinnerContainer.style.height = '80px';
+            spinnerContainer.style.width = '72px'; // Уменьшено на 10%
+            spinnerContainer.style.height = '72px'; // Уменьшено на 10%
             
             const spinner = document.createElement('div');
             spinner.style.position = 'absolute';
-            spinner.style.width = '64px';
-            spinner.style.height = '64px';
-            spinner.style.margin = '8px';
-            spinner.style.border = '6px solid rgba(139, 101, 255, 0.3)';
+            spinner.style.width = '57.6px'; // Уменьшено на 10%
+            spinner.style.height = '57.6px'; // Уменьшено на 10%
+            spinner.style.margin = '7.2px'; // Уменьшено на 10%
+            spinner.style.border = '5.4px solid rgba(139, 101, 255, 0.27)'; // Уменьшено на 10%
             spinner.style.borderRadius = '50%';
             spinner.style.borderTopColor = '#8e2de2';
             spinner.style.animation = 'spin 1s ease-in-out infinite';
             
             const innerSpinner = document.createElement('div');
             innerSpinner.style.position = 'absolute';
-            innerSpinner.style.width = '40px';
-            innerSpinner.style.height = '40px';
-            innerSpinner.style.margin = '20px';
-            innerSpinner.style.border = '4px solid rgba(139, 101, 255, 0.3)';
+            innerSpinner.style.width = '36px'; // Уменьшено на 10%
+            innerSpinner.style.height = '36px'; // Уменьшено на 10%
+            innerSpinner.style.margin = '18px'; // Уменьшено на 10%
+            innerSpinner.style.border = '3.6px solid rgba(139, 101, 255, 0.27)'; // Уменьшено на 10%
             innerSpinner.style.borderRadius = '50%';
             innerSpinner.style.borderTopColor = '#4a00e0';
             innerSpinner.style.animation = 'spinReverse 1.2s ease-in-out infinite';
             
             const loadingText = document.createElement('div');
             loadingText.textContent = 'Loading...';
-            loadingText.style.marginTop = '20px';
-            loadingText.style.fontSize = '16px';
+            loadingText.style.marginTop = '18px'; // Уменьшено на 10%
+            loadingText.style.fontSize = '14.4px'; // Уменьшено на 10%
             loadingText.style.fontWeight = '600';
             loadingText.style.color = '#bbb';
-            loadingText.style.letterSpacing = '1px';
+            loadingText.style.letterSpacing = '0.9px'; // Уменьшено на 10%
             
             // Добавляем CSS анимацию
             const style = document.createElement('style');
@@ -137,60 +152,168 @@
             return;
         }
 
+        // Создаем оверлей для загрузки
+        if (!div.querySelector('#trench-overlay')) {
+            const overlay = document.createElement('div');
+            overlay.id = 'trench-overlay';
+            Object.assign(overlay.style, {
+                position: 'absolute',
+                top: '0',
+                left: '0',
+                width: '100%',
+                height: '100%',
+                background: 'rgba(0,0,0,0.3)',
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)',
+                zIndex: '1',
+                display: 'none',
+                justifyContent: 'center',
+                alignItems: 'center',
+                opacity: '0',
+                transition: 'opacity 0.3s ease',
+                borderRadius: '6px'
+            });
+
+            // Добавляем анимацию загрузки в оверлей
+            const spinnerContainer = document.createElement('div');
+            spinnerContainer.style.display = 'inline-block';
+            spinnerContainer.style.position = 'relative';
+            spinnerContainer.style.width = '72px'; // Уменьшено на 10%
+            spinnerContainer.style.height = '72px'; // Уменьшено на 10%
+            
+            const spinner = document.createElement('div');
+            spinner.style.position = 'absolute';
+            spinner.style.width = '57.6px'; // Уменьшено на 10%
+            spinner.style.height = '57.6px'; // Уменьшено на 10%
+            spinner.style.margin = '7.2px'; // Уменьшено на 10%
+            spinner.style.border = '5.4px solid rgba(139, 101, 255, 0.27)'; // Уменьшено на 10%
+            spinner.style.borderRadius = '50%';
+            spinner.style.borderTopColor = '#8e2de2';
+            spinner.style.animation = 'spin 1s ease-in-out infinite';
+            
+            const innerSpinner = document.createElement('div');
+            innerSpinner.style.position = 'absolute';
+            innerSpinner.style.width = '36px'; // Уменьшено на 10%
+            innerSpinner.style.height = '36px'; // Уменьшено на 10%
+            innerSpinner.style.margin = '18px'; // Уменьшено на 10%
+            innerSpinner.style.border = '3.6px solid rgba(139, 101, 255, 0.27)'; // Уменьшено на 10%
+            innerSpinner.style.borderRadius = '50%';
+            innerSpinner.style.borderTopColor = '#4a00e0';
+            innerSpinner.style.animation = 'spinReverse 1.2s ease-in-out infinite';
+            
+            const loadingText = document.createElement('div');
+            loadingText.textContent = 'Refreshing...';
+            loadingText.style.marginTop = '18px'; // Уменьшено на 10%
+            loadingText.style.fontSize = '14.4px'; // Уменьшено на 10%
+            loadingText.style.fontWeight = '600';
+            loadingText.style.color = '#bbb';
+            loadingText.style.letterSpacing = '0.9px'; // Уменьшено на 10%
+            loadingText.style.textAlign = 'center';
+            
+            spinnerContainer.appendChild(spinner);
+            spinnerContainer.appendChild(innerSpinner);
+            overlay.appendChild(spinnerContainer);
+            overlay.appendChild(loadingText);
+            div.appendChild(overlay);
+        }
+
         // Header (закрепленный)
-        const header = document.createElement('div');
-        header.style.display = 'flex';
-        header.style.justifyContent = 'space-between';
-        header.style.alignItems = 'center';
-        header.style.padding = '12px 15px';
-        header.style.borderBottom = '1px solid #444';
-        header.style.background = 'linear-gradient(to right, #1a1a2e, #16213e)';
-        header.style.position = 'sticky';
-        header.style.top = '0';
-        header.style.zIndex = '1';
+const header = document.createElement('div');
+header.style.display = 'flex';
+header.style.justifyContent = 'space-between';
+header.style.alignItems = 'center';
+header.style.padding = '10.8px 13.5px';
+header.style.borderBottom = '0.9px solid #444';
+header.style.background = 'linear-gradient(to right, #1a1a2e, #16213e)';
+header.style.position = 'sticky';
+header.style.top = '0';
+header.style.zIndex = '2';
 
-        const title = document.createElement('h2');
-        title.innerHTML = `<span style="color: #eee; font-weight: 600;">TrenchRadar:</span> <span style="color: #4fc3f7; font-weight: 700;">$${data.tokenTicker}</span>`;
-        title.style.margin = '0';
-        title.style.fontSize = '18px';
-        title.style.fontWeight = '600';
+const title = document.createElement('h2');
+title.innerHTML = `<span style="color: #eee; font-weight: 600;">TrenchRadar:</span> <span style="color: #4fc3f7; font-weight: 700;">$${data.tokenTicker}</span>`;
+title.style.margin = '0';
+title.style.fontSize = '16.2px';
+title.style.fontWeight = '600';
 
-        const closeBtn = document.createElement('div');
-        closeBtn.innerHTML = '&times;';
-        closeBtn.style.cursor = 'pointer';
-        closeBtn.style.fontSize = '28px';
-        closeBtn.style.color = '#ddd';
-        closeBtn.style.width = '32px';
-        closeBtn.style.height = '32px';
-        closeBtn.style.display = 'flex';
-        closeBtn.style.alignItems = 'center';
-        closeBtn.style.justifyContent = 'center';
-        closeBtn.style.transition = 'all 0.2s';
-        closeBtn.style.borderRadius = '4px';
-        closeBtn.addEventListener('mouseover', () => {
-            closeBtn.style.color = '#fff';
-            closeBtn.style.backgroundColor = 'rgba(255,255,255,0.1)';
-        });
-        closeBtn.addEventListener('mouseout', () => {
-            closeBtn.style.color = '#ddd';
-            closeBtn.style.backgroundColor = 'transparent';
-        });
-        closeBtn.addEventListener('click', closeInfoPopup);
+// Создаем контейнер для кнопок
+const buttonsContainer = document.createElement('div');
+buttonsContainer.style.display = 'flex';
+buttonsContainer.style.gap = '8px'; // Отступ между кнопками
 
-        header.appendChild(title);
-        header.appendChild(closeBtn);
-        div.appendChild(header);
+// Добавляем кнопку обновления
+const refreshBtn = document.createElement('div');
+refreshBtn.innerHTML = '🔄';
+refreshBtn.title = 'Refresh data';
+refreshBtn.style.cursor = 'pointer';
+// Убрали отрицательный margin
+refreshBtn.style.fontSize = '21.6px';
+refreshBtn.style.color = '#ddd';
+refreshBtn.style.width = '28.8px';
+refreshBtn.style.height = '28.8px';
+refreshBtn.style.display = 'flex';
+refreshBtn.style.alignItems = 'center'; // Выравнивание по центру
+refreshBtn.style.justifyContent = 'center';
+refreshBtn.style.transition = 'all 0.2s';
+refreshBtn.style.borderRadius = '3.6px';
+refreshBtn.addEventListener('mouseover', () => {
+    refreshBtn.style.color = '#fff';
+    refreshBtn.style.backgroundColor = 'rgba(255,255,255,0.1)';
+});
+refreshBtn.addEventListener('mouseout', () => {
+    refreshBtn.style.transform = 'rotate(0)';
+    refreshBtn.style.color = '#ddd';
+    refreshBtn.style.backgroundColor = 'transparent';
+});
+refreshBtn.addEventListener('click', function(event) {
+    event.stopPropagation();
+    if (currentTokenAddress) {
+        showOverlay();
+        fetchTrenchBotBundles(currentTokenAddress);
+    }
+});
+
+const closeBtn = document.createElement('div');
+closeBtn.innerHTML = '&times;';
+closeBtn.style.cursor = 'pointer';
+closeBtn.style.fontSize = '25.2px';
+closeBtn.style.color = '#ddd';
+closeBtn.style.width = '28.8px';
+closeBtn.style.height = '28.8px';
+closeBtn.style.display = 'flex';
+closeBtn.style.alignItems = 'center';
+closeBtn.style.justifyContent = 'center';
+closeBtn.style.transition = 'all 0.2s';
+closeBtn.style.borderRadius = '3.6px';
+closeBtn.addEventListener('mouseover', () => {
+    closeBtn.style.color = '#fff';
+    closeBtn.style.backgroundColor = 'rgba(255,255,255,0.1)';
+});
+closeBtn.addEventListener('mouseout', () => {
+    closeBtn.style.color = '#ddd';
+    closeBtn.style.backgroundColor = 'transparent';
+});
+closeBtn.addEventListener('click', closeInfoPopup);
+
+// Добавляем кнопки в контейнер в нужном порядке
+buttonsContainer.appendChild(refreshBtn);
+buttonsContainer.appendChild(closeBtn);
+
+// Добавляем элементы в заголовок
+header.appendChild(title);
+header.appendChild(buttonsContainer); // Контейнер с кнопками справа
+
+div.appendChild(header);
 
         // Overall Stats
         const overallSection = document.createElement('section');
-        overallSection.style.padding = '10px 15px';
-        overallSection.style.borderBottom = '1px solid #444';
+        overallSection.style.padding = '9px 13.5px'; // Уменьшено на 10%
+        overallSection.style.borderBottom = '0.9px solid #444'; // Уменьшено на 10%
 
         const overallTitle = document.createElement('h3');
-        overallTitle.innerHTML = '📊 <span style="border-bottom: 1px dashed #666; padding-bottom: 3px; font-weight: 600;">Overall Statistics</span>';
-        overallTitle.style.marginTop = '3px';
-        overallTitle.style.marginBottom = '8px';
-        overallTitle.style.fontSize = '16px';
+        overallTitle.innerHTML = '📊 <span style="border-bottom: 0.9px dashed #666; padding-bottom: 2.7px; font-weight: 600;">Overall Statistics</span>'; // Уменьшено на 10%
+        overallTitle.style.marginTop = '2.7px'; // Уменьшено на 10%
+        overallTitle.style.marginBottom = '7.2px'; // Уменьшено на 10%
+        overallTitle.style.fontSize = '14.4px'; // Уменьшено на 10%
         overallTitle.style.color = '#ffb74d';
         overallTitle.style.fontWeight = '600';
 
@@ -206,19 +329,19 @@
             const statRow = document.createElement('div');
             statRow.style.display = 'flex';
             statRow.style.justifyContent = 'space-between';
-            statRow.style.marginBottom = '3px';
+            statRow.style.marginBottom = '2.7px'; // Уменьшено на 10%
             statRow.style.alignItems = 'center';
-            statRow.style.padding = '5px 10px';
+            statRow.style.padding = '4.5px 9px'; // Уменьшено на 10%
 
             const labelDiv = document.createElement('div');
             labelDiv.style.display = 'flex';
             labelDiv.style.alignItems = 'center';
-            labelDiv.style.gap = '8px';
+            labelDiv.style.gap = '7.2px'; // Уменьшено на 10%
             labelDiv.style.fontWeight = '500';
 
             const iconSpan = document.createElement('span');
             iconSpan.textContent = stat.icon;
-            iconSpan.style.fontSize = '18px';
+            iconSpan.style.fontSize = '16.2px'; // Уменьшено на 10%
 
             const textSpan = document.createElement('span');
             textSpan.textContent = stat.label;
@@ -231,7 +354,7 @@
             valueDiv.textContent = stat.value;
             valueDiv.style.fontWeight = stat.fontWeight || '600';
             valueDiv.style.color = stat.color;
-            valueDiv.style.fontSize = '14px';
+            valueDiv.style.fontSize = '12.6px'; // Уменьшено на 10%
 
             statRow.appendChild(labelDiv);
             statRow.appendChild(valueDiv);
@@ -241,145 +364,145 @@
         div.appendChild(overallSection);
 
         // Top Bundles
-const topSection = document.createElement('section');
-topSection.style.padding = '15px';
+        const topSection = document.createElement('section');
+        topSection.style.padding = '13.5px'; // Уменьшено на 10%
 
-const topTitle = document.createElement('h3');
-topTitle.innerHTML = '🏆 <span style="border-bottom: 1px dashed #666; padding-bottom: 3px; font-weight: 600;">Top 5 Holding Bundles</span>';
-topTitle.style.marginTop = '0';
-topTitle.style.marginBottom = '15px';
-topTitle.style.fontSize = '16px';
-topTitle.style.color = '#ffb74d';
-topTitle.style.fontWeight = '600';
+        const topTitle = document.createElement('h3');
+        topTitle.innerHTML = '🏆 <span style="border-bottom: 0.9px dashed #666; padding-bottom: 2.7px; font-weight: 600;">Top 5 Holding Bundles</span>'; // Уменьшено на 10%
+        topTitle.style.marginTop = '0';
+        topTitle.style.marginBottom = '13.5px'; // Уменьшено на 10%
+        topTitle.style.fontSize = '14.4px'; // Уменьшено на 10%
+        topTitle.style.color = '#ffb74d';
+        topTitle.style.fontWeight = '600';
 
-topSection.appendChild(topTitle);
+        topSection.appendChild(topTitle);
 
-if (data.topBundles.length === 0) {
-    const empty = document.createElement('div');
-    empty.style.textAlign = 'center';
-    empty.style.padding = '20px 0';
-    empty.style.color = '#888';
-    empty.textContent = 'No bundles holding tokens';
-    topSection.appendChild(empty);
-} else {
-    data.topBundles.forEach(bundle => {
-        const bundleCard = document.createElement('div');
-        bundleCard.style.background = 'rgba(50,50,70,0.4)';
-        bundleCard.style.borderRadius = '8px';
-        bundleCard.style.padding = '8px 15px';
-        bundleCard.style.marginBottom = '8px';
-        bundleCard.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-        bundleCard.style.borderLeft = '3px solid #4a148c';
+        if (data.topBundles.length === 0) {
+            const empty = document.createElement('div');
+            empty.style.textAlign = 'center';
+            empty.style.padding = '18px 0'; // Уменьшено на 10%
+            empty.style.color = '#888';
+            empty.textContent = 'No bundles holding tokens';
+            topSection.appendChild(empty);
+        } else {
+            data.topBundles.forEach(bundle => {
+                const bundleCard = document.createElement('div');
+                bundleCard.style.background = 'rgba(50,50,70,0.4)';
+                bundleCard.style.borderRadius = '7.2px'; // Уменьшено на 10%
+                bundleCard.style.padding = '7.2px 13.5px'; // Уменьшено на 10%
+                bundleCard.style.marginBottom = '7.2px'; // Уменьшено на 10%
+                bundleCard.style.boxShadow = '0 1.8px 4.5px rgba(0,0,0,0.18)'; // Уменьшено на 10%
+                bundleCard.style.borderLeft = '2.7px solid #4a148c'; // Уменьшено на 10%
 
-        const bundleHeader = document.createElement('div');
-        bundleHeader.style.display = 'flex';
-        bundleHeader.style.justifyContent = 'space-between';
-        bundleHeader.style.alignItems = 'center';
-        bundleHeader.style.marginBottom = '8px';
+                const bundleHeader = document.createElement('div');
+                bundleHeader.style.display = 'flex';
+                bundleHeader.style.justifyContent = 'space-between';
+                bundleHeader.style.alignItems = 'center';
+                bundleHeader.style.marginBottom = '7.2px'; // Уменьшено на 10%
 
-        const bundleTitle = document.createElement('div');
-        bundleTitle.style.display = 'flex';
-        bundleTitle.style.alignItems = 'center';
-        bundleTitle.style.gap = '8px';
+                const bundleTitle = document.createElement('div');
+                bundleTitle.style.display = 'flex';
+                bundleTitle.style.alignItems = 'center';
+                bundleTitle.style.gap = '7.2px'; // Уменьшено на 10%
 
-        const categoryEmoji = {
-            sniper: '🎯',
-            new_wallet: '🌱',
-            regular: '✅'
-        }[bundle.primaryCategory] || '🔹';
+                const categoryEmoji = {
+                    sniper: '🎯',
+                    new_wallet: '🌱',
+                    regular: '✅'
+                }[bundle.primaryCategory] || '🔹';
 
-        const emojiSpan = document.createElement('span');
-        emojiSpan.textContent = categoryEmoji;
-        emojiSpan.style.fontSize = '20px';
+                const emojiSpan = document.createElement('span');
+                emojiSpan.textContent = categoryEmoji;
+                emojiSpan.style.fontSize = '18px'; // Сохранен размер для эмодзи
 
-        const idSpan = document.createElement('span');
-        idSpan.textContent = `Slot ${bundle.id}`;
-        idSpan.style.fontWeight = '600';
-        idSpan.style.color = '#e1bee7';
+                const idSpan = document.createElement('span');
+                idSpan.textContent = `Slot ${bundle.id}`;
+                idSpan.style.fontWeight = '600';
+                idSpan.style.color = '#e1bee7';
 
-        bundleTitle.appendChild(emojiSpan);
-        bundleTitle.appendChild(idSpan);
-        bundleHeader.appendChild(bundleTitle);
+                bundleTitle.appendChild(emojiSpan);
+                bundleTitle.appendChild(idSpan);
+                bundleHeader.appendChild(bundleTitle);
 
-        const categorySpan = document.createElement('span');
-        categorySpan.textContent = bundle.primaryCategory;
-        categorySpan.style.background = '#4527a0';
-        categorySpan.style.color = '#d1c4e9';
-        categorySpan.style.padding = '3px 20px';
-        categorySpan.style.borderRadius = '10px';
-        categorySpan.style.fontSize = '14px';
-        categorySpan.style.fontWeight = '600';
-        bundleHeader.appendChild(categorySpan);
+                const categorySpan = document.createElement('span');
+                categorySpan.textContent = bundle.primaryCategory;
+                categorySpan.style.background = '#4527a0';
+                categorySpan.style.color = '#d1c4e9';
+                categorySpan.style.padding = '2.7px 18px'; // Уменьшено на 10%
+                categorySpan.style.borderRadius = '9px'; // Уменьшено на 10%
+                categorySpan.style.fontSize = '12.6px'; // Уменьшено на 10%
+                categorySpan.style.fontWeight = '600';
+                bundleHeader.appendChild(categorySpan);
 
-        bundleCard.appendChild(bundleHeader);
+                bundleCard.appendChild(bundleHeader);
 
-        const bundleStats = [
-            { icon: '👥', label: 'Unique Wallets', value: bundle.uniqueWallets, fontWeight: '600' },
-            { icon: '💸', label: 'SOL Spent', value: bundle.solSpent + ' SOL', fontWeight: '600' },
-            { icon: '📌', label: 'Remaining Supply', value: bundle.holdingPercentage + '%', fontWeight: '600', isSupply: true }
-        ];
+                const bundleStats = [
+                    { icon: '👥', label: 'Unique Wallets', value: bundle.uniqueWallets, fontWeight: '600' },
+                    { icon: '💸', label: 'SOL Spent', value: bundle.solSpent + ' SOL', fontWeight: '600' },
+                    { icon: '📌', label: 'Remaining Supply', value: bundle.holdingPercentage + '%', fontWeight: '600', isSupply: true }
+                ];
 
-        bundleStats.forEach(stat => {
-            const statRow = document.createElement('div');
-            statRow.style.display = 'flex';
-            statRow.style.justifyContent = 'space-between';
-            statRow.style.marginBottom = '3px';
-            statRow.style.fontSize = '14px';
+                bundleStats.forEach(stat => {
+                    const statRow = document.createElement('div');
+                    statRow.style.display = 'flex';
+                    statRow.style.justifyContent = 'space-between';
+                    statRow.style.marginBottom = '2.7px'; // Уменьшено на 10%
+                    statRow.style.fontSize = '12.6px'; // Уменьшено на 10%
 
-            const labelDiv = document.createElement('div');
-            labelDiv.style.display = 'flex';
-            labelDiv.style.alignItems = 'center';
-            labelDiv.style.gap = '6px';
-            labelDiv.style.color = '#aaa';
-            labelDiv.style.fontWeight = '500';
+                    const labelDiv = document.createElement('div');
+                    labelDiv.style.display = 'flex';
+                    labelDiv.style.alignItems = 'center';
+                    labelDiv.style.gap = '5.4px'; // Уменьшено на 10%
+                    labelDiv.style.color = '#aaa';
+                    labelDiv.style.fontWeight = '500';
 
-            const iconSpan = document.createElement('span');
-            iconSpan.textContent = stat.icon;
+                    const iconSpan = document.createElement('span');
+                    iconSpan.textContent = stat.icon;
 
-            const textSpan = document.createElement('span');
-            textSpan.textContent = stat.label;
+                    const textSpan = document.createElement('span');
+                    textSpan.textContent = stat.label;
 
-            labelDiv.appendChild(iconSpan);
-            labelDiv.appendChild(textSpan);
+                    labelDiv.appendChild(iconSpan);
+                    labelDiv.appendChild(textSpan);
 
-            const valueDiv = document.createElement('div');
-            valueDiv.textContent = stat.value;
-            valueDiv.style.fontWeight = stat.fontWeight || '600';
+                    const valueDiv = document.createElement('div');
+                    valueDiv.textContent = stat.value;
+                    valueDiv.style.fontWeight = stat.fontWeight || '600';
 
-            // Установка цвета для Remaining Supply
-            if (stat.isSupply) {
-                const percentage = parseFloat(bundle.holdingPercentage);
-                if (percentage > 4) {
-                    valueDiv.style.color = '#f15974'; // розовый / красноватый
-                } else if (percentage === 0) {
-                    valueDiv.style.color = '#4caf50'; // зеленый в тональности
-                } else {
-                    valueDiv.style.color = '#fbc02d'; // желтый в тональности
-                }
-            } else {
-                valueDiv.style.color = '#fff';
-            }
+                    // Установка цвета для Remaining Supply
+                    if (stat.isSupply) {
+                        const percentage = parseFloat(bundle.holdingPercentage);
+                        if (percentage > 4) {
+                            valueDiv.style.color = '#f15974'; // розовый / красноватый
+                        } else if (percentage === 0) {
+                            valueDiv.style.color = '#4caf50'; // зеленый в тональности
+                        } else {
+                            valueDiv.style.color = '#fbc02d'; // желтый в тональности
+                        }
+                    } else {
+                        valueDiv.style.color = '#fff';
+                    }
 
-            statRow.appendChild(labelDiv);
-            statRow.appendChild(valueDiv);
-            bundleCard.appendChild(statRow);
-        });
+                    statRow.appendChild(labelDiv);
+                    statRow.appendChild(valueDiv);
+                    bundleCard.appendChild(statRow);
+                });
 
                 // Индикатор прогресса
                 const progressContainer = document.createElement('div');
                 progressContainer.style.position = 'relative';
                 progressContainer.style.width = '100%';
-                progressContainer.style.height = '24px';
+                progressContainer.style.height = '21.6px'; // Уменьшено на 10%
                 progressContainer.style.backgroundColor = 'rgba(255,255,255,0.1)';
-                progressContainer.style.borderRadius = '4px';
-                progressContainer.style.marginTop = '10px';
+                progressContainer.style.borderRadius = '3.6px'; // Уменьшено на 10%
+                progressContainer.style.marginTop = '9px'; // Уменьшено на 10%
                 progressContainer.style.overflow = 'hidden';
 
                 const progressBar = document.createElement('div');
                 progressBar.style.width = Math.min(100, bundle.remainingBundlePercent) + '%';
                 progressBar.style.height = '100%';
                 progressBar.style.background = 'linear-gradient(to right, #4a00e0, #8e2de2)';
-                progressBar.style.borderRadius = '4px';
+                progressBar.style.borderRadius = '3.6px'; // Уменьшено на 10%
 
                 const progressText = document.createElement('div');
                 progressText.textContent = `Remaining Bundle: ${bundle.remainingBundlePercent.toFixed(2)}%`;
@@ -391,10 +514,10 @@ if (data.topBundles.length === 0) {
                 progressText.style.display = 'flex';
                 progressText.style.alignItems = 'center';
                 progressText.style.justifyContent = 'center';
-                progressText.style.fontSize = '12px';
+                progressText.style.fontSize = '10.8px'; // Уменьшено на 10%
                 progressText.style.fontWeight = '600';
                 progressText.style.color = '#fff';
-                progressText.style.textShadow = '0px 0px 3px rgba(0,0,0,0.8)';
+                progressText.style.textShadow = '0px 0px 2.7px rgba(0,0,0,0.72)'; // Уменьшено на 10%
 
                 progressContainer.appendChild(progressBar);
                 progressContainer.appendChild(progressText);
@@ -408,11 +531,11 @@ if (data.topBundles.length === 0) {
 
         // Footer note
         const footer = document.createElement('div');
-        footer.style.padding = '10px 15px';
+        footer.style.padding = '9px 13.5px'; // Уменьшено на 10%
         footer.style.textAlign = 'center';
-        footer.style.fontSize = '11px';
+        footer.style.fontSize = '9.9px'; // Уменьшено на 10%
         footer.style.color = '#666';
-        footer.style.borderTop = '1px solid #333';
+        footer.style.borderTop = '0.9px solid #333'; // Уменьшено на 10%
         footer.textContent = 'Data provided by TrenchRadar • v1.9.4';
         div.appendChild(footer);
 
@@ -426,6 +549,15 @@ if (data.topBundles.length === 0) {
     }
 
     function fetchTrenchBotBundles(tokenAddress) {
+        // Сохраняем текущий адрес токена для обновления
+        currentTokenAddress = tokenAddress;
+        
+        // Отменяем предыдущие запросы
+        activeRequests.forEach(requestId => {
+            chrome.runtime.sendMessage({ action: 'abortRequest', requestId });
+        });
+        activeRequests = [];
+        
         chrome.runtime.sendMessage({ 
             action: 'getCookies', 
             domain: 'trench.bot' 
@@ -434,6 +566,7 @@ if (data.topBundles.length === 0) {
             
             if (!response.cookies) {
                 createOrUpdateInfo('Failed to get cookies');
+                hideOverlay();
                 return;
             }
             
@@ -441,34 +574,42 @@ if (data.topBundles.length === 0) {
             const requestId = 'trench_' + Date.now();
             
             chrome.runtime.sendMessage({
-                action: 'fetchData',
-                requestId: requestId,
-                url: `https://trench.bot/api/bundle/bundle_full/${tokenAddress}`,
-                headers: {
-                    'accept': 'application/json, text/plain, */*',
-                    'origin': 'https://trench.bot',
-                    'referer': `https://trench.bot/bundles/${tokenAddress}`,
-                    'user-agent': navigator.userAgent,
-                    'cookie': cookieStr
-                }
-            }, (resp) => {
-                // Удаляем ID запроса из активных
-                activeRequests = activeRequests.filter(id => id !== requestId);
+            action: 'fetchData',
+            requestId: requestId,
+            url: `https://trench.bot/api/bundle/bundle_full/${tokenAddress}`,
+            headers: {
+                'accept': 'application/json, text/plain, */*',
+                'origin': 'https://trench.bot',
+                'referer': `https://trench.bot/bundles/${tokenAddress}`,
+                'user-agent': navigator.userAgent,
+                'cookie': cookieStr
+            }
+        }, (resp) => {
+            // Удаляем ID запроса из активных
+            activeRequests = activeRequests.filter(id => id !== requestId);
+            
+            // Скрываем оверлей после загрузки
+            hideOverlay();
+            
+            // Проверяем, открыт ли еще попап
+            if (!isPopupOpen) return;
+            
+            // Обработка ошибок API
+            if (resp.error || !resp.data || resp.data.error) {
+                const errorMessage = "Error loading TrenchRadar data. Make sure it's pump.fun token";
+                createOrUpdateInfo(errorMessage);
+                return;
+            }
+            
+            try {
+                const data = resp.data;
                 
-                // Проверяем, открыт ли еще попап
-                if (!isPopupOpen) return;
-                
-                if (resp.error) {
-                    createOrUpdateInfo(`Error: ${resp.error}`);
+                // Проверка наличия данных о бандлах
+                if (!data.bundles || Object.keys(data.bundles).length === 0) {
+                    const errorMessage = "No bundles found. This token might not be tracked by TrenchRadar or it's too early to check";
+                    createOrUpdateInfo(errorMessage);
                     return;
                 }
-                
-                try {
-                    const data = resp.data;
-                    if (!data.bundles || Object.keys(data.bundles).length === 0) {
-                        createOrUpdateInfo('No bundles found');
-                        return;
-                    }
 
                     const totalBundles = Object.keys(data.bundles).length;
                     const totalSol = Object.values(data.bundles).reduce((sum, b) => sum + b.total_sol, 0);
@@ -515,12 +656,13 @@ if (data.topBundles.length === 0) {
                     createOrUpdateInfo(popupData);
 
                 } catch (e) {
-                    createOrUpdateInfo(`JSON parsing error: ${e.message}`);
-                }
-            });
-            
-            // Добавляем ID запроса в активные
-            activeRequests.push(requestId);
+                const errorMessage = `Data processing error: ${e.message}`;
+                createOrUpdateInfo(errorMessage);
+            }
+        });
+        
+        // Добавляем ID запроса в активные
+        activeRequests.push(requestId);
         });
     }
 
@@ -753,38 +895,38 @@ if (data.topBundles.length === 0) {
         }
     }
 
-// Вставляем кнопку при загрузке страницы с улучшенным наблюдателем
-const observer = new MutationObserver((mutations) => {
-    // Для nova.trade
-    if (getCurrentSite() === 'nova') {
-        const targetElement = document.querySelector('div.flex.h-\\[42px\\].w-full.items-center.justify-between.py-3.md\\:h-\\[34px\\]');
-        if (targetElement && !document.getElementById('trench-check-btn')) {
-            try {
-                insertButton();
-            } catch (e) {
-                console.error('Error inserting button:', e);
+    // Вставляем кнопку при загрузке страницы с улучшенным наблюдателем
+    const observer = new MutationObserver((mutations) => {
+        // Для nova.trade
+        if (getCurrentSite() === 'nova') {
+            const targetElement = document.querySelector('div.flex.h-\\[42px\\].w-full.items-center.justify-between.py-3.md\\:h-\\[34px\\]');
+            if (targetElement && !document.getElementById('trench-check-btn')) {
+                try {
+                    insertButton();
+                } catch (e) {
+                    console.error('Error inserting button:', e);
+                }
             }
         }
-    }
-    // Для axiom.trade
-    else if (getCurrentSite() === 'axiom') {
-        const statsContainer = document.querySelector('div.flex.flex-col.flex-1.gap-\\[16px\\].p-\\[16px\\].pt-\\[4px\\].min-h-\\[0px\\]');
-        if (statsContainer && !document.getElementById('trench-check-btn')) {
-            try {
-                insertButton();
-            } catch (e) {
-                console.error('Error inserting button:', e);
+        // Для axiom.trade
+        else if (getCurrentSite() === 'axiom') {
+            const statsContainer = document.querySelector('div.flex.flex-col.flex-1.gap-\\[16px\\].p-\\[16px\\].pt-\\[4px\\].min-h-\\[0px\\]');
+            if (statsContainer && !document.getElementById('trench-check-btn')) {
+                try {
+                    insertButton();
+                } catch (e) {
+                    console.error('Error inserting button:', e);
+                }
             }
         }
-    }
-});
+    });
 
-observer.observe(document, {
-    childList: true,
-    subtree: true,
-    attributes: false,
-    characterData: false
-});
+    observer.observe(document, {
+        childList: true,
+        subtree: true,
+        attributes: false,
+        characterData: false
+    });
     
     // Закрытие попапа при клике в любое место страницы
     document.addEventListener('click', function(event) {
