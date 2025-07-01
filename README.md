@@ -1,16 +1,14 @@
-# TrenchRadar Bundle Fetcher - Browser Extension & Userscript
+# TrenchRadar Bundle Fetcher - Browser Extension
 
 ## 📦 Extension Description
 
-**TrenchRadar Bundle Fetcher** is a powerful tool that displays bundle information for tokens on Axiom Trade by fetching data from TrenchRadar API. The tool shows:
+**TrenchRadar Bundle Fetcher** is a powerful tool that displays bundle information for tokens on Axiom and Nova by fetching data from TrenchRadar API. The tool shows:
 
 - Overall token statistics (holding bundles, total SOL spent, held percentage)
 - Top 5 holding bundles with detailed information
 - Visual progress indicators for remaining tokens
 
-## 🛠 Installation Methods
-
-### Option 1: Install as Chrome Extension (Recommended) (Axiom and Nova)
+## 🛠 Installation Method
 
 #### Step-by-Step Guide:
 
@@ -44,43 +42,6 @@
 6. **Use the Extension**  
 - Navigate to `https://axiom.trade/meme/[token-address]`
 - Click the "Check Bundles" button that appears in the navigation bar
-
-### Option 2: Install as Tampermonkey Userscript (only Axiom)
-
-#### Step-by-Step Guide:
-
-1. **Install Tampermonkey Extension**  
-- Get Tampermonkey from Chrome Web Store:  
-  [https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
-
-2. **Create New Userscript**  
-- Click Tampermonkey icon in toolbar
-- Select "Create a new script"
-
-3. **Paste the Userscript Code**  
-- Delete all existing code in the editor
-- Paste the full userscript code (from content.js)
-- Make sure the metadata block is included at the top
-
-4. **Save the Userscript**  
-- Press `Ctrl+S` or click "File > Save"
-- The script will now be active
-
-5. **Use the Userscript**  
-- Navigate to `https://axiom.trade/meme/[token-address]`
-- Click the "Check Bundles" button that appears in the navigation bar
-
-## 🔧 Troubleshooting
-
-**For Extension Installation:**
-- If you see "Invalid manifest" error, check your `manifest.json` formatting
-- Make sure all required files are in the folder
-- Chrome may show warnings about "unpacked extensions" - this is normal
-
-**For Userscript Installation:**
-- Ensure Tampermonkey is enabled for the site
-- Check script is set to run on `https://axiom.trade/*` URLs
-- Refresh the page after installing
 
 ## ⚠️ Important Notes
 
