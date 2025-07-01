@@ -7,6 +7,148 @@
     let isPopupOpen = false;
     let currentTokenAddress = null;
 
+    // Добавляем переменные для управления автообновлением
+    let autoRefreshInterval = null;
+    let autoRefreshTimeout = null;
+    let isAutoRefreshActive = false; // Флаг для отслеживания состояния автообновления
+
+    // Глобальная переменная для управления тултипами
+    let activeTooltip = null;
+
+    // Функция для создания тултипов
+    function createTooltip(element, text) {
+        element.addEventListener('mouseenter', (e) => {
+            // Удаляем существующий тултип, если есть
+            if (activeTooltip) {
+                activeTooltip.remove();
+            }
+            
+            // Создаем новый тултип
+            const tooltip = document.createElement('div');
+            tooltip.textContent = text;
+            tooltip.style.position = 'fixed';
+            tooltip.style.backgroundColor = 'rgba(0,0,0,0.9)';
+            tooltip.style.color = 'white';
+            tooltip.style.padding = '6px 10px';
+            tooltip.style.borderRadius = '4px';
+            tooltip.style.fontSize = '12px';
+            tooltip.style.fontFamily = "'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+            tooltip.style.zIndex = '1000000';
+            tooltip.style.boxShadow = '0 3px 10px rgba(0,0,0,0.5)';
+            tooltip.style.whiteSpace = 'nowrap';
+            tooltip.style.pointerEvents = 'none';
+            tooltip.style.opacity = '0';
+            tooltip.style.transition = 'opacity 0.15s ease';
+            tooltip.style.display = 'block';
+            
+            document.body.appendChild(tooltip);
+            activeTooltip = tooltip;
+            
+            // Позиционируем тултип
+            const rect = element.getBoundingClientRect();
+            tooltip.style.left = `${rect.left + rect.width/2}px`;
+            tooltip.style.top = `${rect.top - 10}px`;
+            tooltip.style.transform = 'translate(-50%, -100%)';
+            
+            // Показываем с анимацией
+            setTimeout(() => tooltip.style.opacity = '1', 10);
+        });
+        
+        element.addEventListener('mouseleave', () => {
+            if (activeTooltip) {
+                activeTooltip.style.opacity = '0';
+                setTimeout(() => {
+                    if (activeTooltip && activeTooltip.parentNode) {
+                        activeTooltip.parentNode.removeChild(activeTooltip);
+                        activeTooltip = null;
+                    }
+                }, 150);
+            }
+        });
+        
+        element.addEventListener('mousemove', (e) => {
+            if (activeTooltip) {
+                const rect = element.getBoundingClientRect();
+                activeTooltip.style.left = `${rect.left + rect.width/2}px`;
+                activeTooltip.style.top = `${rect.top - 10}px`;
+            }
+        });
+    }
+
+    // Добавляем стили для анимации
+const animationStyle = document.createElement('style');
+animationStyle.textContent = `
+    @keyframes trench-pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    @keyframes trench-rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .trench-refreshing {
+        animation: trench-pulse 0.5s ease-in-out;
+    }
+    .trench-refreshing .trench-arrow {
+        animation: trench-rotate 0.5s linear;
+        transform-origin: 12px 12px; /* Добавленная строка */
+    }
+`;
+
+    document.head.appendChild(animationStyle);
+
+    // Функция для остановки автообновления
+    function stopAutoRefresh() {
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+            autoRefreshInterval = null;
+        }
+        if (autoRefreshTimeout) {
+            clearTimeout(autoRefreshTimeout);
+            autoRefreshTimeout = null;
+        }
+        
+        isAutoRefreshActive = false; // Сбрасываем флаг
+        
+        // Обновляем состояние кнопки
+        const autoRefreshBtn = document.getElementById('trench-auto-refresh-btn');
+        if (autoRefreshBtn) {
+            autoRefreshBtn.classList.remove('active');
+            autoRefreshBtn.style.backgroundColor = 'transparent';
+            autoRefreshBtn.style.border = 'none';
+            autoRefreshBtn.querySelector('svg path').style.stroke = '#ddd';
+        }
+    }
+
+    // Функция для запуска автообновления
+    function startAutoRefresh() {
+        // Останавливаем предыдущее автообновление, если было
+        stopAutoRefresh();
+        
+        isAutoRefreshActive = true; // Устанавливаем флаг
+        
+        // Обновляем состояние кнопки
+        const autoRefreshBtn = document.getElementById('trench-auto-refresh-btn');
+        if (autoRefreshBtn) {
+            autoRefreshBtn.classList.add('active');
+            autoRefreshBtn.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
+            autoRefreshBtn.querySelector('svg path').style.stroke = '#4CAF50';
+        }
+        
+        // Запускаем автообновление каждые 5 секунд
+        autoRefreshInterval = setInterval(() => {
+            if (currentTokenAddress && isPopupOpen) {
+                fetchTrenchBotBundles(currentTokenAddress, true);
+            }
+        }, 5000);
+        
+        // Останавливаем через 2 минуты (120 секунд)
+        autoRefreshTimeout = setTimeout(() => {
+            stopAutoRefresh();
+        }, 120000);
+    }
+
     // Функция для закрытия попапа
     function closeInfoPopup() {
         const infoDiv = document.getElementById('trench-info-div');
@@ -21,6 +163,9 @@
                     chrome.runtime.sendMessage({ action: 'abortRequest', requestId });
                 });
                 activeRequests = [];
+                
+                // Останавливаем автообновление
+                stopAutoRefresh();
             }, 300);
         }
     }
@@ -218,91 +363,167 @@
         }
 
         // Header (закрепленный)
-const header = document.createElement('div');
-header.style.display = 'flex';
-header.style.justifyContent = 'space-between';
-header.style.alignItems = 'center';
-header.style.padding = '10.8px 13.5px';
-header.style.borderBottom = '0.9px solid #444';
-header.style.background = 'linear-gradient(to right, #1a1a2e, #16213e)';
-header.style.position = 'sticky';
-header.style.top = '0';
-header.style.zIndex = '2';
+        const header = document.createElement('div');
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'center';
+        header.style.padding = '10.8px 13.5px';
+        header.style.borderBottom = '0.9px solid #444';
+        header.style.background = 'linear-gradient(to right, #1a1a2e, #16213e)';
+        header.style.position = 'sticky';
+        header.style.top = '0';
+        header.style.zIndex = '2';
 
-const title = document.createElement('h2');
-title.innerHTML = `<span style="color: #eee; font-weight: 600;">TrenchRadar:</span> <span style="color: #4fc3f7; font-weight: 700;">$${data.tokenTicker}</span>`;
-title.style.margin = '0';
-title.style.fontSize = '16.2px';
-title.style.fontWeight = '600';
+        const title = document.createElement('h2');
+        title.innerHTML = `<span style="color: #eee; font-weight: 600;">TrenchRadar:</span> <span style="color: #4fc3f7; font-weight: 700;">$${data.tokenTicker}</span>`;
+        title.style.margin = '0';
+        title.style.fontSize = '16.2px';
+        title.style.fontWeight = '600';
 
-// Создаем контейнер для кнопок
-const buttonsContainer = document.createElement('div');
-buttonsContainer.style.display = 'flex';
-buttonsContainer.style.gap = '8px'; // Отступ между кнопками
+        // Создаем контейнер для кнопок
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.style.display = 'flex';
+        buttonsContainer.style.gap = '8px';
 
-// Добавляем кнопку обновления
-const refreshBtn = document.createElement('div');
-refreshBtn.innerHTML = '🔄';
-refreshBtn.title = 'Refresh data';
-refreshBtn.style.cursor = 'pointer';
-// Убрали отрицательный margin
-refreshBtn.style.fontSize = '21.6px';
-refreshBtn.style.color = '#ddd';
-refreshBtn.style.width = '28.8px';
-refreshBtn.style.height = '28.8px';
-refreshBtn.style.display = 'flex';
-refreshBtn.style.alignItems = 'center'; // Выравнивание по центру
-refreshBtn.style.justifyContent = 'center';
-refreshBtn.style.transition = 'all 0.2s';
-refreshBtn.style.borderRadius = '3.6px';
-refreshBtn.addEventListener('mouseover', () => {
-    refreshBtn.style.color = '#fff';
-    refreshBtn.style.backgroundColor = 'rgba(255,255,255,0.1)';
-});
-refreshBtn.addEventListener('mouseout', () => {
-    refreshBtn.style.transform = 'rotate(0)';
-    refreshBtn.style.color = '#ddd';
-    refreshBtn.style.backgroundColor = 'transparent';
-});
-refreshBtn.addEventListener('click', function(event) {
-    event.stopPropagation();
-    if (currentTokenAddress) {
-        showOverlay();
-        fetchTrenchBotBundles(currentTokenAddress);
-    }
-});
+        // Кнопка автообновления
+        const autoRefreshBtn = document.createElement('div');
+        autoRefreshBtn.id = 'trench-auto-refresh-btn';
+        autoRefreshBtn.style.cursor = 'pointer';
+        autoRefreshBtn.style.width = '28.8px';
+        autoRefreshBtn.style.height = '28.8px';
+        autoRefreshBtn.style.display = 'flex';
+        autoRefreshBtn.style.alignItems = 'center';
+        autoRefreshBtn.style.justifyContent = 'center';
+        autoRefreshBtn.style.transition = 'all 0.2s';
+        autoRefreshBtn.style.borderRadius = '3.6px';
+        autoRefreshBtn.style.color = '#ddd';
 
-const closeBtn = document.createElement('div');
-closeBtn.innerHTML = '&times;';
-closeBtn.style.cursor = 'pointer';
-closeBtn.style.fontSize = '25.2px';
-closeBtn.style.color = '#ddd';
-closeBtn.style.width = '28.8px';
-closeBtn.style.height = '28.8px';
-closeBtn.style.display = 'flex';
-closeBtn.style.alignItems = 'center';
-closeBtn.style.justifyContent = 'center';
-closeBtn.style.transition = 'all 0.2s';
-closeBtn.style.borderRadius = '3.6px';
-closeBtn.addEventListener('mouseover', () => {
-    closeBtn.style.color = '#fff';
-    closeBtn.style.backgroundColor = 'rgba(255,255,255,0.1)';
-});
-closeBtn.addEventListener('mouseout', () => {
-    closeBtn.style.color = '#ddd';
-    closeBtn.style.backgroundColor = 'transparent';
-});
-closeBtn.addEventListener('click', closeInfoPopup);
+        // SVG для кнопки автообновления (часы)
+        autoRefreshBtn.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                <path class="trench-arrow" d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        `;
 
-// Добавляем кнопки в контейнер в нужном порядке
-buttonsContainer.appendChild(refreshBtn);
-buttonsContainer.appendChild(closeBtn);
+        // Создаем тултип для кнопки автообновления
+        createTooltip(autoRefreshBtn, 'Auto-refresh every 5 seconds (max 2 minutes)');
 
-// Добавляем элементы в заголовок
-header.appendChild(title);
-header.appendChild(buttonsContainer); // Контейнер с кнопками справа
+        // Восстанавливаем состояние кнопки при пересоздании попапа
+        if (isAutoRefreshActive) {
+            autoRefreshBtn.classList.add('active');
+            autoRefreshBtn.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
+            autoRefreshBtn.querySelector('svg path').style.stroke = '#4CAF50';
+        }
 
-div.appendChild(header);
+        autoRefreshBtn.addEventListener('mouseover', () => {
+            if (autoRefreshBtn.classList.contains('active')) {
+                autoRefreshBtn.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
+                autoRefreshBtn.querySelector('svg path').style.stroke = '#66BB6A';
+            } else {
+                autoRefreshBtn.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                autoRefreshBtn.querySelector('svg path').style.stroke = '#fff';
+            }
+        });
+
+        autoRefreshBtn.addEventListener('mouseout', () => {
+            if (autoRefreshBtn.classList.contains('active')) {
+                autoRefreshBtn.style.backgroundColor = 'rgba(76, 175, 80, 0.2)';
+                autoRefreshBtn.querySelector('svg path').style.stroke = '#4CAF50';
+            } else {
+                autoRefreshBtn.style.backgroundColor = 'transparent';
+                autoRefreshBtn.querySelector('svg path').style.stroke = '#ddd';
+            }
+        });
+
+        autoRefreshBtn.addEventListener('click', function(event) {
+            event.stopPropagation();
+            if (autoRefreshBtn.classList.contains('active')) {
+                stopAutoRefresh();
+            } else {
+                startAutoRefresh();
+            }
+        });
+
+        // Кнопка ручного обновления
+        const refreshBtn = document.createElement('div');
+        refreshBtn.id = 'trench-refresh-btn';
+        refreshBtn.style.cursor = 'pointer';
+        refreshBtn.style.width = '28.8px';
+        refreshBtn.style.height = '28.8px';
+        refreshBtn.style.display = 'flex';
+        refreshBtn.style.alignItems = 'center';
+        refreshBtn.style.justifyContent = 'center';
+        refreshBtn.style.transition = 'all 0.2s';
+        refreshBtn.style.borderRadius = '3.6px';
+        refreshBtn.style.color = '#ddd';
+
+        // Создаем тултип для кнопки обновления
+        createTooltip(refreshBtn, 'Refresh data');
+
+        // SVG для кнопки обновления (стрелка по кругу)
+        refreshBtn.innerHTML += `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M23 4v6h-6M1 20v-6h6" stroke="#ddd" stroke-width="2" stroke-linecap="round"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke="#ddd" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        `;
+
+        refreshBtn.addEventListener('mouseover', () => {
+            refreshBtn.style.backgroundColor = 'rgba(255,255,255,0.1)';
+            refreshBtn.querySelector('svg path').style.stroke = '#fff';
+        });
+
+        refreshBtn.addEventListener('mouseout', () => {
+            refreshBtn.style.backgroundColor = 'transparent';
+            refreshBtn.querySelector('svg path').style.stroke = '#ddd';
+        });
+
+        refreshBtn.addEventListener('click', function(event) {
+            event.stopPropagation();
+            if (currentTokenAddress) {
+                showOverlay();
+                fetchTrenchBotBundles(currentTokenAddress, false);
+            }
+        });
+
+        // Кнопка закрытия
+        const closeBtn = document.createElement('div');
+        closeBtn.innerHTML = '&times;';
+        closeBtn.style.cursor = 'pointer';
+        closeBtn.style.fontSize = '25.2px';
+        closeBtn.style.color = '#ddd';
+        closeBtn.style.width = '28.8px';
+        closeBtn.style.height = '28.8px';
+        closeBtn.style.display = 'flex';
+        closeBtn.style.alignItems = 'center';
+        closeBtn.style.justifyContent = 'center';
+        closeBtn.style.transition = 'all 0.2s';
+        closeBtn.style.borderRadius = '3.6px';
+
+        // Создаем тултип для кнопки закрытия
+        createTooltip(closeBtn, 'Close');
+
+        closeBtn.addEventListener('mouseover', () => {
+            closeBtn.style.color = '#fff';
+            closeBtn.style.backgroundColor = 'rgba(255,255,255,0.1)';
+        });
+        closeBtn.addEventListener('mouseout', () => {
+            closeBtn.style.color = '#ddd';
+            closeBtn.style.backgroundColor = 'transparent';
+        });
+        closeBtn.addEventListener('click', closeInfoPopup);
+
+        // Добавляем кнопки в контейнер в нужном порядке
+        buttonsContainer.appendChild(autoRefreshBtn);
+        buttonsContainer.appendChild(refreshBtn);
+        buttonsContainer.appendChild(closeBtn);
+
+        // Добавляем элементы в заголовок
+        header.appendChild(title);
+        header.appendChild(buttonsContainer); // Контейнер с кнопками справа
+
+        div.appendChild(header);
 
         // Overall Stats
         const overallSection = document.createElement('section');
@@ -387,12 +608,35 @@ div.appendChild(header);
         } else {
             data.topBundles.forEach(bundle => {
                 const bundleCard = document.createElement('div');
-                bundleCard.style.background = 'rgba(50,50,70,0.4)';
                 bundleCard.style.borderRadius = '7.2px'; // Уменьшено на 10%
                 bundleCard.style.padding = '7.2px 13.5px'; // Уменьшено на 10%
                 bundleCard.style.marginBottom = '7.2px'; // Уменьшено на 10%
                 bundleCard.style.boxShadow = '0 1.8px 4.5px rgba(0,0,0,0.18)'; // Уменьшено на 10%
                 bundleCard.style.borderLeft = '2.7px solid #4a148c'; // Уменьшено на 10%
+
+                // Определяем фон в зависимости от процента владения
+                const holdingPerc = parseFloat(bundle.holdingPercentage);
+                let bgColor;
+                
+                if (bundle.primaryCategory === 'new_wallet') {
+                    if (holdingPerc === 0) {
+                        // Зеленый для new_wallet с 0%
+                        bgColor = 'rgba(76, 175, 80, 0.1)';
+                    } else {
+                        // Красный для new_wallet с любым процентом >0
+                        bgColor = 'rgba(244, 67, 54, 0.1)';
+                    }
+                } else {
+                    if (holdingPerc === 0) {
+                        bgColor = 'rgba(76, 175, 80, 0.1)';
+                    } else if (holdingPerc <= 4) {
+                        bgColor = 'rgba(255, 193, 7, 0.1)';
+                    } else {
+                        bgColor = 'rgba(244, 67, 54, 0.1)';
+                    }
+                }
+                
+                bundleCard.style.backgroundColor = bgColor;
 
                 const bundleHeader = document.createElement('div');
                 bundleHeader.style.display = 'flex';
@@ -548,7 +792,31 @@ div.appendChild(header);
         window.addEventListener('popstate', handleUrlChange);
     }
 
-    function fetchTrenchBotBundles(tokenAddress) {
+    function fetchTrenchBotBundles(tokenAddress, isAutoRefresh = false) {
+        // Сохраняем состояние автообновления перед запросом
+        const wasAutoRefreshActive = isAutoRefreshActive;
+        
+        // Для автообновления запускаем анимацию кнопки
+        if (isAutoRefresh) {
+            const autoRefreshBtn = document.getElementById('trench-auto-refresh-btn');
+            if (autoRefreshBtn) {
+                const svgElement = autoRefreshBtn.querySelector('svg');
+                if (svgElement) {
+                    svgElement.classList.remove('trench-refreshing');
+                    void svgElement.offsetWidth; // Trigger reflow
+                    svgElement.classList.add('trench-refreshing');
+                    
+                    // Убираем анимацию через 500 мс (после завершения)
+                    setTimeout(() => {
+                        svgElement.classList.remove('trench-refreshing');
+                    }, 500);
+                }
+            }
+        } else {
+            // Для ручного обновления показываем оверлей
+            showOverlay();
+        }
+
         // Сохраняем текущий адрес токена для обновления
         currentTokenAddress = tokenAddress;
         
@@ -566,7 +834,7 @@ div.appendChild(header);
             
             if (!response.cookies) {
                 createOrUpdateInfo('Failed to get cookies');
-                hideOverlay();
+                if (!isAutoRefresh) hideOverlay();
                 return;
             }
             
@@ -574,42 +842,44 @@ div.appendChild(header);
             const requestId = 'trench_' + Date.now();
             
             chrome.runtime.sendMessage({
-            action: 'fetchData',
-            requestId: requestId,
-            url: `https://trench.bot/api/bundle/bundle_full/${tokenAddress}`,
-            headers: {
-                'accept': 'application/json, text/plain, */*',
-                'origin': 'https://trench.bot',
-                'referer': `https://trench.bot/bundles/${tokenAddress}`,
-                'user-agent': navigator.userAgent,
-                'cookie': cookieStr
-            }
-        }, (resp) => {
-            // Удаляем ID запроса из активных
-            activeRequests = activeRequests.filter(id => id !== requestId);
-            
-            // Скрываем оверлей после загрузки
-            hideOverlay();
-            
-            // Проверяем, открыт ли еще попап
-            if (!isPopupOpen) return;
-            
-            // Обработка ошибок API
-            if (resp.error || !resp.data || resp.data.error) {
-                const errorMessage = "Error loading TrenchRadar data. Make sure it's pump.fun token";
-                createOrUpdateInfo(errorMessage);
-                return;
-            }
-            
-            try {
-                const data = resp.data;
+                action: 'fetchData',
+                requestId: requestId,
+                url: `https://trench.bot/api/bundle/bundle_full/${tokenAddress}`,
+                headers: {
+                    'accept': 'application/json, text/plain, */*',
+                    'origin': 'https://trench.bot',
+                    'referer': `https://trench.bot/bundles/${tokenAddress}`,
+                    'user-agent': navigator.userAgent,
+                    'cookie': cookieStr
+                }
+            }, (resp) => {
+                // Удаляем ID запроса из активных
+                activeRequests = activeRequests.filter(id => id !== requestId);
                 
-                // Проверка наличия данных о бандлах
-                if (!data.bundles || Object.keys(data.bundles).length === 0) {
-                    const errorMessage = "No bundles found. This token might not be tracked by TrenchRadar or it's too early to check";
+                // Скрываем оверлей только для ручного обновления
+                if (!isAutoRefresh) {
+                    hideOverlay();
+                }
+                
+                // Проверяем, открыт ли еще попап
+                if (!isPopupOpen) return;
+                
+                // Обработка ошибок API
+                if (resp.error || !resp.data || resp.data.error) {
+                    const errorMessage = "Error loading TrenchRadar data. Make sure it's pump.fun token";
                     createOrUpdateInfo(errorMessage);
                     return;
                 }
+                
+                try {
+                    const data = resp.data;
+                    
+                    // Проверка наличия данных о бандлах
+                    if (!data.bundles || Object.keys(data.bundles).length === 0) {
+                        const errorMessage = "No bundles found. This token might not be tracked by TrenchRadar or it's too early to check";
+                        createOrUpdateInfo(errorMessage);
+                        return;
+                    }
 
                     const totalBundles = Object.keys(data.bundles).length;
                     const totalSol = Object.values(data.bundles).reduce((sum, b) => sum + b.total_sol, 0);
@@ -656,13 +926,13 @@ div.appendChild(header);
                     createOrUpdateInfo(popupData);
 
                 } catch (e) {
-                const errorMessage = `Data processing error: ${e.message}`;
-                createOrUpdateInfo(errorMessage);
-            }
-        });
-        
-        // Добавляем ID запроса в активные
-        activeRequests.push(requestId);
+                    const errorMessage = `Data processing error: ${e.message}`;
+                    createOrUpdateInfo(errorMessage);
+                }
+            });
+            
+            // Добавляем ID запроса в активные
+            activeRequests.push(requestId);
         });
     }
 
