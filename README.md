@@ -51,7 +51,10 @@
 - No data is collected or sent to third parties
 - Works best on Chromium-based browsers (Chrome, Edge, Brave)
 
-## 💰 All tips are highly appreciated, but never required.
+
+## 💰 Tips
+
+All tips are highly appreciated, but never required
 
 - SOL: 6AViDkkpnDbULHuWoGqsLNPJxX318AVkpUd7oBYBS5DD
 - trc20: THneiUwewN4xjvDkmfgMk23XSAPvcLfLv2
