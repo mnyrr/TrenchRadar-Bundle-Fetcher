@@ -80,7 +80,7 @@ const animationStyle = document.createElement('style');
 animationStyle.textContent = `
     @keyframes trench-pulse {
         0% { transform: scale(1); }
-        50% { transform: scale(1.2); }
+        50% { transform: scale(1.4); }
         100% { transform: scale(1); }
     }
     @keyframes trench-rotate {
@@ -193,109 +193,140 @@ animationStyle.textContent = `
     }
 
     function createOrUpdateInfo(data) {
-        let div = document.getElementById('trench-info-div');
-        const button = document.getElementById('trench-check-btn');
+    
+    let div = document.getElementById('trench-info-div');
+    const button = document.getElementById('trench-check-btn');
 
-        if (!div) {
-            div = document.createElement('div');
-            div.id = 'trench-info-div';
-            Object.assign(div.style, {
-                position: 'fixed',
-                width: '342px', // Уменьшено на 10%
-                maxHeight: '90vh',
-                overflowY: 'auto',
-                padding: '0',
-                backgroundColor: 'rgba(33,33,33,0.98)',
-                color: 'white',
-                fontSize: '12.6px', // Уменьшено на 10%
-                fontWeight: '500',
-                borderRadius: '6px',
-                zIndex: '99999',
-                cursor: 'default',
-                display: 'none',
-                fontFamily: "'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
-                boxShadow: '0 4px 18px rgba(0,0,0,0.63)', // Уменьшено на 10%
-                border: '1.8px solid rgba(139, 101, 255, 0.27)', // Уменьшено на 10%
-                outline: '1.8px solid rgba(255, 255, 255, 0.09)', // Уменьшено на 10%
-                opacity: '0',
-                transition: 'opacity 0.3s ease'
-            });
-            
-            document.body.appendChild(div);
-        } else {
-            div.innerHTML = '';
-        }
+    if (!div) {
+        div = document.createElement('div');
+        div.id = 'trench-info-div';
+        Object.assign(div.style, {
+            position: 'fixed',
+            width: '342px',
+            maxHeight: '95vh',
+            overflowY: 'auto',
+            padding: '0',
+            backgroundColor: 'rgba(33,33,33,0.98)',
+            color: 'white',
+            fontSize: '12.6px',
+            fontWeight: '500',
+            borderRadius: '6px',
+            zIndex: '99999',
+            cursor: 'default',
+            display: 'none',
+            fontFamily: "'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+            boxShadow: '0 4px 18px rgba(0,0,0,0.63)',
+            border: '1.8px solid rgba(139, 101, 255, 0.27)',
+            outline: '1.8px solid rgba(255, 255, 255, 0.09)',
+            opacity: '0',
+            transition: 'opacity 0.3s ease'
+        });
+        
+        document.body.appendChild(div);
+    } else {
+        div.innerHTML = '';
+    }
 
-        // Фиксированное позиционирование в правом верхнем углу
-        div.style.position = 'fixed';
-        div.style.top = '36px'; // Уменьшено на 10%
-        div.style.right = '18px'; // Уменьшено на 10%
-        div.style.left = 'auto';
-        div.style.bottom = 'auto';
+    // Фиксированное позиционирование в правом верхнем углу
+    div.style.position = 'fixed';
+    div.style.top = '36px';
+    div.style.right = '18px';
+    div.style.left = 'auto';
+    div.style.bottom = 'auto';
 
-        if (typeof data === 'string') {
-            // Стильный индикатор загрузки
-            const loadingContainer = document.createElement('div');
-            loadingContainer.style.padding = '27px 18px'; // Уменьшено на 10%
-            loadingContainer.style.textAlign = 'center';
-            
-            const spinnerContainer = document.createElement('div');
-            spinnerContainer.style.display = 'inline-block';
-            spinnerContainer.style.position = 'relative';
-            spinnerContainer.style.width = '72px'; // Уменьшено на 10%
-            spinnerContainer.style.height = '72px'; // Уменьшено на 10%
-            
-            const spinner = document.createElement('div');
-            spinner.style.position = 'absolute';
-            spinner.style.width = '57.6px'; // Уменьшено на 10%
-            spinner.style.height = '57.6px'; // Уменьшено на 10%
-            spinner.style.margin = '7.2px'; // Уменьшено на 10%
-            spinner.style.border = '5.4px solid rgba(139, 101, 255, 0.27)'; // Уменьшено на 10%
-            spinner.style.borderRadius = '50%';
-            spinner.style.borderTopColor = '#8e2de2';
-            spinner.style.animation = 'spin 1s ease-in-out infinite';
-            
-            const innerSpinner = document.createElement('div');
-            innerSpinner.style.position = 'absolute';
-            innerSpinner.style.width = '36px'; // Уменьшено на 10%
-            innerSpinner.style.height = '36px'; // Уменьшено на 10%
-            innerSpinner.style.margin = '18px'; // Уменьшено на 10%
-            innerSpinner.style.border = '3.6px solid rgba(139, 101, 255, 0.27)'; // Уменьшено на 10%
-            innerSpinner.style.borderRadius = '50%';
-            innerSpinner.style.borderTopColor = '#4a00e0';
-            innerSpinner.style.animation = 'spinReverse 1.2s ease-in-out infinite';
-            
-            const loadingText = document.createElement('div');
-            loadingText.textContent = 'Loading...';
-            loadingText.style.marginTop = '18px'; // Уменьшено на 10%
-            loadingText.style.fontSize = '14.4px'; // Уменьшено на 10%
-            loadingText.style.fontWeight = '600';
-            loadingText.style.color = '#bbb';
-            loadingText.style.letterSpacing = '0.9px'; // Уменьшено на 10%
-            
-            // Добавляем CSS анимацию
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes spin {
-                    to { transform: rotate(360deg); }
-                }
-                @keyframes spinReverse {
-                    to { transform: rotate(-360deg); }
-                }
-            `;
-            
-            spinnerContainer.appendChild(spinner);
-            spinnerContainer.appendChild(innerSpinner);
-            loadingContainer.appendChild(style);
-            loadingContainer.appendChild(spinnerContainer);
-            loadingContainer.appendChild(loadingText);
-            div.appendChild(loadingContainer);
-            
-            div.style.display = 'block';
-            setTimeout(() => div.style.opacity = '1', 10);
-            isPopupOpen = true;
-            return;
-        }
+    if (typeof data === 'string' || (data && data.error)) {
+        // Показ сообщения об ошибке
+        const errorMessage = typeof data === 'string' ? data : data.error;
+        
+        const errorContainer = document.createElement('div');
+        errorContainer.style.padding = '27px 18px';
+        errorContainer.style.textAlign = 'center';
+        
+        const errorIcon = document.createElement('div');
+        errorIcon.textContent = '❌';
+        errorIcon.style.fontSize = '36px';
+        errorIcon.style.marginBottom = '18px';
+        errorIcon.style.color = '#f44336';
+        
+        const errorText = document.createElement('div');
+        errorText.textContent = errorMessage;
+        errorText.style.fontSize = '14.4px';
+        errorText.style.color = '#f44336';
+        errorText.style.fontWeight = '600';
+        errorText.style.whiteSpace = 'pre-line';
+        
+        errorContainer.appendChild(errorIcon);
+        errorContainer.appendChild(errorText);
+        div.appendChild(errorContainer);
+        
+        div.style.display = 'block';
+        setTimeout(() => div.style.opacity = '1', 10);
+        isPopupOpen = true;
+        return;
+    } else if (data && data.loading) {
+        // Стильный индикатор загрузки
+        
+        const loadingContainer = document.createElement('div');
+        loadingContainer.style.padding = '27px 18px';
+        loadingContainer.style.textAlign = 'center';
+        
+        const spinnerContainer = document.createElement('div');
+        spinnerContainer.style.display = 'inline-block';
+        spinnerContainer.style.position = 'relative';
+        spinnerContainer.style.width = '72px';
+        spinnerContainer.style.height = '72px';
+        
+        const spinner = document.createElement('div');
+        spinner.style.position = 'absolute';
+        spinner.style.width = '57.6px';
+        spinner.style.height = '57.6px';
+        spinner.style.margin = '7.2px';
+        spinner.style.border = '5.4px solid rgba(139, 101, 255, 0.27)';
+        spinner.style.borderRadius = '50%';
+        spinner.style.borderTopColor = '#8e2de2';
+        spinner.style.animation = 'spin 1s ease-in-out infinite';
+        
+        const innerSpinner = document.createElement('div');
+        innerSpinner.style.position = 'absolute';
+        innerSpinner.style.width = '36px';
+        innerSpinner.style.height = '36px';
+        innerSpinner.style.margin = '18px';
+        innerSpinner.style.border = '3.6px solid rgba(139, 101, 255, 0.27)';
+        innerSpinner.style.borderRadius = '50%';
+        innerSpinner.style.borderTopColor = '#4a00e0';
+        innerSpinner.style.animation = 'spinReverse 1.2s ease-in-out infinite';
+        
+        const loadingText = document.createElement('div');
+        loadingText.textContent = data.message || 'Loading...';
+        loadingText.style.marginTop = '18px';
+        loadingText.style.fontSize = '14.4px';
+        loadingText.style.fontWeight = '600';
+        loadingText.style.color = '#bbb';
+        loadingText.style.letterSpacing = '0.9px';
+        
+        // Добавляем CSS анимацию
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+            @keyframes spinReverse {
+                to { transform: rotate(-360deg); }
+            }
+        `;
+        
+        spinnerContainer.appendChild(spinner);
+        spinnerContainer.appendChild(innerSpinner);
+        loadingContainer.appendChild(style);
+        loadingContainer.appendChild(spinnerContainer);
+        loadingContainer.appendChild(loadingText);
+        div.appendChild(loadingContainer);
+        
+        div.style.display = 'block';
+        setTimeout(() => div.style.opacity = '1', 10);
+        isPopupOpen = true;
+        return;
+    }
 
         // Создаем оверлей для загрузки
         if (!div.querySelector('#trench-overlay')) {
@@ -793,189 +824,234 @@ animationStyle.textContent = `
     }
 
     function fetchTrenchBotBundles(tokenAddress, isAutoRefresh = false) {
-        // Сохраняем состояние автообновления перед запросом
-        const wasAutoRefreshActive = isAutoRefreshActive;
-        
-        // Для автообновления запускаем анимацию кнопки
-        if (isAutoRefresh) {
-            const autoRefreshBtn = document.getElementById('trench-auto-refresh-btn');
-            if (autoRefreshBtn) {
-                const svgElement = autoRefreshBtn.querySelector('svg');
-                if (svgElement) {
+    
+    // Сохраняем состояние автообновления перед запросом
+    const wasAutoRefreshActive = isAutoRefreshActive;
+    
+    // Для автообновления запускаем анимацию кнопки
+    if (isAutoRefresh) {
+        const autoRefreshBtn = document.getElementById('trench-auto-refresh-btn');
+        if (autoRefreshBtn) {
+            const svgElement = autoRefreshBtn.querySelector('svg');
+            if (svgElement) {
+                svgElement.classList.remove('trench-refreshing');
+                void svgElement.offsetWidth; // Trigger reflow
+                svgElement.classList.add('trench-refreshing');
+                
+                // Убираем анимацию через 500 мс (после завершения)
+                setTimeout(() => {
                     svgElement.classList.remove('trench-refreshing');
-                    void svgElement.offsetWidth; // Trigger reflow
-                    svgElement.classList.add('trench-refreshing');
-                    
-                    // Убираем анимацию через 500 мс (после завершения)
-                    setTimeout(() => {
-                        svgElement.classList.remove('trench-refreshing');
-                    }, 500);
-                }
+                }, 500);
             }
-        } else {
-            // Для ручного обновления показываем оверлей
-            showOverlay();
         }
-
-        // Сохраняем текущий адрес токена для обновления
-        currentTokenAddress = tokenAddress;
-        
-        // Отменяем предыдущие запросы
-        activeRequests.forEach(requestId => {
-            chrome.runtime.sendMessage({ action: 'abortRequest', requestId });
-        });
-        activeRequests = [];
-        
-        chrome.runtime.sendMessage({ 
-            action: 'getCookies', 
-            domain: 'trench.bot' 
-        }, (response) => {
-            if (!isPopupOpen) return;
-            
-            if (!response.cookies) {
-                createOrUpdateInfo('Failed to get cookies');
-                if (!isAutoRefresh) hideOverlay();
-                return;
-            }
-            
-            const cookieStr = response.cookies.map(c => `${c.name}=${c.value}`).join('; ');
-            const requestId = 'trench_' + Date.now();
-            
-            chrome.runtime.sendMessage({
-                action: 'fetchData',
-                requestId: requestId,
-                url: `https://trench.bot/api/bundle/bundle_full/${tokenAddress}`,
-                headers: {
-                    'accept': 'application/json, text/plain, */*',
-                    'origin': 'https://trench.bot',
-                    'referer': `https://trench.bot/bundles/${tokenAddress}`,
-                    'user-agent': navigator.userAgent,
-                    'cookie': cookieStr
-                }
-            }, (resp) => {
-                // Удаляем ID запроса из активных
-                activeRequests = activeRequests.filter(id => id !== requestId);
-                
-                // Скрываем оверлей только для ручного обновления
-                if (!isAutoRefresh) {
-                    hideOverlay();
-                }
-                
-                // Проверяем, открыт ли еще попап
-                if (!isPopupOpen) return;
-                
-                // Обработка ошибок API
-                if (resp.error || !resp.data || resp.data.error) {
-                    const errorMessage = "Error loading TrenchRadar data. Make sure it's pump.fun token";
-                    createOrUpdateInfo(errorMessage);
-                    return;
-                }
-                
-                try {
-                    const data = resp.data;
-                    
-                    // Проверка наличия данных о бандлах
-                    if (!data.bundles || Object.keys(data.bundles).length === 0) {
-                        const errorMessage = "No bundles found. This token might not be tracked by TrenchRadar or it's too early to check";
-                        createOrUpdateInfo(errorMessage);
-                        return;
-                    }
-
-                    const totalBundles = Object.keys(data.bundles).length;
-                    const totalSol = Object.values(data.bundles).reduce((sum, b) => sum + b.total_sol, 0);
-                    const totalHolding = Object.values(data.bundles).reduce((sum, b) => sum + b.holding_percentage, 0);
-
-                    const holdingBundles = Object.entries(data.bundles)
-                        .map(([id, b]) => {
-                            const remainingBundlePercent = b.total_tokens > 0 
-                                ? (b.holding_amount / b.total_tokens * 100) 
-                                : 0;
-                            
-                            return {
-                                id,
-                                ...b,
-                                primary_category: b.bundle_analysis.primary_category,
-                                remainingBundlePercent: remainingBundlePercent
-                            };
-                        })
-                        .filter(b => b.holding_percentage > 0);
-
-                    const topHoldingBundles = holdingBundles
-                        .sort((a, b) => b.total_sol - a.total_sol)
-                        .slice(0, 5);
-
-                    const popupData = {
-                        tokenTicker: data.ticker ?? 'TOKEN',
-                        overall: {
-                            holdingBundles: holdingBundles.length,
-                            totalBundles: totalBundles,
-                            totalSol: totalSol.toFixed(2),
-                            totalHolding: totalHolding.toFixed(4)
-                        },
-                        topBundles: topHoldingBundles.map(b => ({
-                            id: b.id,
-                            uniqueWallets: b.unique_wallets,
-                            primaryCategory: b.primary_category,
-                            tokenPercentage: b.token_percentage.toFixed(4),
-                            solSpent: b.total_sol.toFixed(2),
-                            holdingPercentage: b.holding_percentage.toFixed(4),
-                            remainingBundlePercent: b.remainingBundlePercent
-                        }))
-                    };
-
-                    createOrUpdateInfo(popupData);
-
-                } catch (e) {
-                    const errorMessage = `Data processing error: ${e.message}`;
-                    createOrUpdateInfo(errorMessage);
-                }
-            });
-            
-            // Добавляем ID запроса в активные
-            activeRequests.push(requestId);
-        });
+    } else {
+        // Для ручного обновления показываем оверлей
+        showOverlay();
     }
 
-    function getFullTokenAddress(pairAddress, cb) {
-        const requestId = 'axiom_' + Date.now();
+    // Сохраняем текущий адрес токена для обновления
+    currentTokenAddress = tokenAddress;
+    
+    // Отменяем предыдущие запросы
+    activeRequests.forEach(requestId => {
+        chrome.runtime.sendMessage({ action: 'abortRequest', requestId });
+    });
+    activeRequests = [];
+    
+    chrome.runtime.sendMessage({ 
+        action: 'getCookies', 
+        domain: 'trench.bot' 
+    }, (response) => {
+        if (!isPopupOpen) {
+            return;
+        }
+        
+        if (!response?.cookies) {
+            const error = 'Failed to get cookies for TrenchRadar';
+            createOrUpdateInfo({
+                error: error + '\nPlease make sure you are logged in on trench.bot'
+            });
+            if (!isAutoRefresh) hideOverlay();
+            return;
+        }
+        
+        const cookieStr = response.cookies.map(c => `${c.name}=${c.value}`).join('; ');
+        const requestId = 'trench_' + Date.now();
         
         chrome.runtime.sendMessage({
             action: 'fetchData',
             requestId: requestId,
-            url: `https://api3.axiom.trade/clipboard-pair-info?address=${pairAddress}`,
+            url: `https://trench.bot/api/bundle/bundle_full/${tokenAddress}`,
             headers: {
                 'accept': 'application/json, text/plain, */*',
-                'origin': 'https://axiom.trade',
-                'referer': 'https://axiom.trade/',
-                'user-agent': navigator.userAgent
+                'origin': 'https://trench.bot',
+                'referer': `https://trench.bot/bundles/${tokenAddress}`,
+                'user-agent': navigator.userAgent,
+                'cookie': cookieStr
             }
         }, (resp) => {
             // Удаляем ID запроса из активных
             activeRequests = activeRequests.filter(id => id !== requestId);
             
-            // Проверяем, открыт ли еще попап
-            if (!isPopupOpen) return;
+            // Скрываем оверлей только для ручного обновления
+            if (!isAutoRefresh) {
+                hideOverlay();
+            }
             
-            if (resp.error) {
-                createOrUpdateInfo(`Error: ${resp.error}`);
+            // Проверяем, открыт ли еще попап
+            if (!isPopupOpen) {
+                return;
+            }
+            
+            // Обработка ошибок сети/сервера
+            if (resp?.error) {
+                const error = `Network error: ${resp.error}`;
+                createOrUpdateInfo({
+                    error: error + '\nPlease check your internet connection'
+                });
+                return;
+            }
+            
+            // Обработка ошибок API
+            if (!resp?.data || resp.data?.error) {
+                const error = resp.data?.error 
+                    ? `API error: ${resp.data.error}` 
+                    : 'Invalid response from TrenchRadar';
+                
+                createOrUpdateInfo({
+                    error: "Token not found or not tracked by TrenchRadar\n" +
+                          "(Only pump.fun tokens are supported)\n"
+                });
                 return;
             }
             
             try {
                 const data = resp.data;
-                if (!data.tokenAddress) {
-                    createOrUpdateInfo('Token address not found in API response');
+                
+                // Проверка наличия данных о бандлах
+                if (!data.bundles || Object.keys(data.bundles).length === 0) {
+                    const error = "No bundles found. This token might not be tracked by TrenchRadar or it's too early to check";
+                    createOrUpdateInfo(error);
                     return;
                 }
-                cb(data.tokenAddress);
+
+                const totalBundles = Object.keys(data.bundles).length;
+                const totalSol = Object.values(data.bundles).reduce((sum, b) => sum + b.total_sol, 0);
+                const totalHolding = Object.values(data.bundles).reduce((sum, b) => sum + b.holding_percentage, 0);
+
+                const holdingBundles = Object.entries(data.bundles)
+                    .map(([id, b]) => {
+                        const remainingBundlePercent = b.total_tokens > 0 
+                            ? (b.holding_amount / b.total_tokens * 100) 
+                            : 0;
+                        
+                        return {
+                            id,
+                            ...b,
+                            primary_category: b.bundle_analysis.primary_category,
+                            remainingBundlePercent: remainingBundlePercent
+                        };
+                    })
+                    .filter(b => b.holding_percentage > 0);
+
+                const topHoldingBundles = holdingBundles
+                    .sort((a, b) => b.total_sol - a.total_sol)
+                    .slice(0, 5);
+
+                const popupData = {
+                    tokenTicker: data.ticker ?? 'TOKEN',
+                    overall: {
+                        holdingBundles: holdingBundles.length,
+                        totalBundles: totalBundles,
+                        totalSol: totalSol.toFixed(2),
+                        totalHolding: totalHolding.toFixed(4)
+                    },
+                    topBundles: topHoldingBundles.map(b => ({
+                        id: b.id,
+                        uniqueWallets: b.unique_wallets,
+                        primaryCategory: b.primary_category,
+                        tokenPercentage: b.token_percentage.toFixed(4),
+                        solSpent: b.total_sol.toFixed(2),
+                        holdingPercentage: b.holding_percentage.toFixed(4),
+                        remainingBundlePercent: b.remainingBundlePercent
+                    }))
+                };
+
+                createOrUpdateInfo(popupData);
+
             } catch (e) {
-                createOrUpdateInfo(`JSON parsing error: ${e.message}`);
+                const error = `Data processing error: ${e.message}\n${e.stack}`;
+                createOrUpdateInfo({
+                    error: "An error occurred while processing data\n" +
+                           "Please try again or contact support\n\n" +
+                           "Error details: " + e.message
+                });
             }
         });
         
         // Добавляем ID запроса в активные
         activeRequests.push(requestId);
-    }
+    });
+}
+
+    function getFullTokenAddress(pairAddress, cb) {
+    
+    const requestId = 'axiom_' + Date.now();
+    
+    chrome.runtime.sendMessage({
+        action: 'fetchData',
+        requestId: requestId,
+        url: `https://api3.axiom.trade/clipboard-pair-info?address=${pairAddress}`,
+        headers: {
+            'accept': 'application/json, text/plain, */*',
+            'origin': 'https://axiom.trade',
+            'referer': 'https://axiom.trade/',
+            'user-agent': navigator.userAgent
+        }
+    }, (resp) => {
+        // Удаляем ID запроса из активных
+        activeRequests = activeRequests.filter(id => id !== requestId);
+        
+        // Проверяем, открыт ли еще попап
+        if (!isPopupOpen) {
+            return;
+        }
+        
+        if (resp?.error) {
+            const error = `Axiom API error: ${resp.error}`;
+            createOrUpdateInfo({
+                error: "Failed to get token address from Axiom\n" +
+                       "Please try again later\n\n" +
+                       "Error: " + resp.error
+            });
+            return;
+        }
+        
+        try {
+            
+            if (!resp.data?.tokenAddress) {
+                const error = 'Token address not found in API response';
+                createOrUpdateInfo({
+                    error: "Token address not found in Axiom response\n" +
+                           "This pair might not exist or API is down"
+                });
+                return;
+            }
+            
+            cb(resp.data.tokenAddress);
+        } catch (e) {
+            const error = `JSON parsing error: ${e.message}\n${e.stack}`;
+            createOrUpdateInfo({
+                error: "Failed to parse Axiom API response\n" +
+                       "Please try again later\n\n" +
+                       "Error: " + e.message
+            });
+        }
+    });
+    
+    // Добавляем ID запроса в активные
+    activeRequests.push(requestId);
+}
 
     function getPairAddressFromURL() {
         const url = window.location.href;
@@ -994,46 +1070,76 @@ animationStyle.textContent = `
     }
 
     function init() {
-        const site = getCurrentSite();
-        let tokenAddress = null;
+    const site = getCurrentSite();
+    let tokenAddress = null;
 
-        if (site === 'axiom') {
-            const pairAddress = getPairAddressFromURL();
+    if (site === 'axiom') {
+        const pairAddress = getPairAddressFromURL();
 
-            if (!pairAddress) {
-                createOrUpdateInfo('Pair not found in URL');
-                return;
-            }
-
-            createOrUpdateInfo("Fetching token address...");
-
-            getFullTokenAddress(pairAddress, (fullAddr) => {
-                if (!fullAddr) {
-                    createOrUpdateInfo("Token address not found");
-                    return;
-                }
-
-                if (!isPopupOpen) return;
-
-                createOrUpdateInfo("Fetching bundles...");
-                fetchTrenchBotBundles(fullAddr);
+        if (!pairAddress) {
+            const error = 'Pair address not found in URL';
+            createOrUpdateInfo({
+                error: "Could not detect pair address in URL\n" +
+                       "Please make sure you're on a valid Axiom trade page"
             });
-        } 
-        else if (site === 'nova') {
-            // Извлекаем адрес токена из URL
-            const url = window.location.href;
-            const match = url.match(/nova\.trade\/token\/([^/?#]+)/);
-            
-            if (!match) {
-                createOrUpdateInfo('Token address not found in URL');
+            return;
+        }
+
+        createOrUpdateInfo({
+            loading: true,
+            message: "Fetching token address from Axiom..."
+        });
+
+        getFullTokenAddress(pairAddress, (fullAddr) => {
+            if (!fullAddr) {
+                const error = "Token address not found";
+                createOrUpdateInfo({
+                    error: "Could not get token address\n" +
+                           "This pair might not exist or API is down"
+                });
                 return;
             }
-            
-            tokenAddress = match[1];
-            createOrUpdateInfo("Fetching bundles...");
-            fetchTrenchBotBundles(tokenAddress);
+
+            if (!isPopupOpen) {
+                return;
+            }
+
+            createOrUpdateInfo({
+                loading: true,
+                message: "Fetching bundles from TrenchRadar..."
+            });
+            fetchTrenchBotBundles(fullAddr);
+        });
+    } 
+    else if (site === 'nova') {
+        
+        // Извлекаем адрес токена из URL
+        const url = window.location.href;
+        const match = url.match(/nova\.trade\/token\/([^/?#]+)/);
+        
+        if (!match) {
+            const error = 'Token address not found in URL';
+            createOrUpdateInfo({
+                error: "Could not detect token address in URL\n" +
+                       "Please make sure you're on a valid Nova token page"
+            });
+            return;
         }
+        
+        tokenAddress = match[1];
+        createOrUpdateInfo({
+            loading: true,
+            message: "Fetching bundles from TrenchRadar..."
+        });
+        fetchTrenchBotBundles(tokenAddress);
+    } else {
+        const error = 'Unsupported website';
+        createOrUpdateInfo({
+            error: "This website is not supported by TrenchRadar\n" +
+                   "Currently supported: axiom.trade and nova.trade"
+        });
     }
+}
 
     // Новая функция вставки кнопки в контейнер статистики
     function insertButton() {
@@ -1045,7 +1151,6 @@ animationStyle.textContent = `
             const statsContainer = document.querySelector('div.flex.flex-col.flex-1.gap-\\[16px\\].p-\\[16px\\].pt-\\[4px\\].min-h-\\[0px\\]');
             
             if (!statsContainer) {
-                console.log('Stats container not found');
                 return;
             }
 
@@ -1106,7 +1211,6 @@ animationStyle.textContent = `
             const targetElement = document.querySelector('div.flex.h-\\[42px\\].w-full.items-center.justify-between.py-3.md\\:h-\\[34px\\]');
             
             if (!targetElement) {
-                console.log('Target element not found on nova.trade');
                 return;
             }
 
@@ -1174,7 +1278,6 @@ animationStyle.textContent = `
                 try {
                     insertButton();
                 } catch (e) {
-                    console.error('Error inserting button:', e);
                 }
             }
         }
@@ -1185,7 +1288,6 @@ animationStyle.textContent = `
                 try {
                     insertButton();
                 } catch (e) {
-                    console.error('Error inserting button:', e);
                 }
             }
         }

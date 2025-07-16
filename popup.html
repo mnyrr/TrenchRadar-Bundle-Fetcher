@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trench Tools</title>
+    <link rel="stylesheet" href="popup.css">
+    <style>
+        #messageDiv { display: none; color: #ffca64; text-align: center; padding: 10px; }
+    </style>
+</head>
+<body>
+    <div class="trench-popup">
+        <div class="trench-header">
+            <h3>Trench Tools</h3>
+        </div>
+        <div class="trench-content">
+            <div id="messageDiv"></div>
+
+            <!-- Секция настроек Twitter Checker -->
+            <div id="twitterSection">
+                <div class="trench-control">
+                    <div class="trench-control-label">
+                        <strong>Twitter Feed</strong>
+                        <span>Enable/disable feed</span>
+                    </div>
+                    <label class="trench-switch">
+                        <input type="checkbox" id="twitterToggle">
+                        <span class="trench-slider"></span>
+                    </label>
+                </div>
+
+                <div class="trench-section">
+                    <div class="trench-section-title">
+                        <h4>Twitter Settings</h4>
+                    </div>
+
+                    <div class="trench-control-group">
+                        <label for="fontSize">Font Size</label>
+                        <div class="trench-range">
+                            <input type="range" id="fontSize" min="8" max="14" step="0.5">
+                            <span id="fontSizeValue">11px</span>
+                        </div>
+                    </div>
+
+                    <div class="trench-control-group">
+                        <label for="opacity">Opacity</label>
+                        <div class="trench-range">
+                            <input type="range" id="opacity" min="50" max="100" step="5">
+                            <span id="opacityValue">75%</span>
+                        </div>
+                    </div>
+
+                    <div class="trench-control-group">
+                        <label for="mainColor">Main Color</label>
+                        <input type="color" id="mainColor">
+                    </div>
+
+                    <div class="trench-control-group">
+                        <label for="accentColor">Accent Color</label>
+                        <input type="color" id="accentColor">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Секция настроек PnL -->
+            <div id="pnlSection">
+                <div class="trench-control">
+                    <div class="trench-control-label">
+                        <strong>PnL Tracker</strong>
+                        <span>Enable/disable tracker</span>
+                    </div>
+                    <label class="trench-switch">
+                        <input type="checkbox" id="pnlToggle">
+                        <span class="trench-slider"></span>
+                    </label>
+                </div>
+
+                <div class="trench-section">
+                    <div class="trench-section-title">
+                        <h4>PnL Settings</h4>
+                    </div>
+
+                    <div class="trench-control-group">
+                        <label for="walletInput">Wallet Address</label>
+                        <input type="text" id="walletInput" placeholder="Enter your wallet address">
+                    </div>
+
+                    <div class="trench-control-group">
+                        <label for="balanceThreshold">Balance Threshold (SOL)</label>
+                        <input type="number" id="balanceThreshold" step="0.001" min="0" placeholder="e.g., 1.000">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="trench-footer">
+            <button id="resetButton">Reset Settings</button>
+            <span>v1.9.4</span>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

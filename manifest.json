@@ -1,37 +1,66 @@
 {
-  "manifest_version": 3,
-  "name": "TrenchRadar Bundle Fetcher",
-  "version": "1.9.4",
-  "description": "Fetches bundle information from TrenchRadar for tokens on Axiom",
-  "permissions": [
-    "cookies",
-    "storage",
-    "webRequest",
-    "scripting"
-  ],
-  "host_permissions": [
-    "https://axiom.trade/*",
-    "https://trench.bot/*",
-    "https://api3.axiom.trade/*",
-    "https://nova.trade/*"
-  ],
-  "background": {
-    "service_worker": "background.js",
-    "type": "module"
-  },
-  "content_scripts": [
-    {
+    "manifest_version": 3,
+    "name": "TrenchRadar Bundle Fetcher",
+    "version": "1.9.4",
+    "description": "Fetches bundle information from TrenchRadar for tokens on Axiom",
+    "permissions": [
+        "cookies",
+        "storage",
+        "webRequest",
+        "scripting",
+        "tabs",
+        "activeTab"
+    ],
+    "host_permissions": [
+        "https://axiom.trade/*",
+        "https://trench.bot/*",
+        "https://api3.axiom.trade/*",
+        "https://api.fxtwitter.com/*",
+        "https://api6.axiom.trade/*",
+        "https://pbs.twimg.com/*",
+        "https://nova.trade/*",
+        "https://www.bloombot.app/*",
+        "https://api.coingecko.com/*",
+        "https://solana.com/*",
+        "https://cryptach.org/*"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://axiom.trade/*",
+                "https://nova.trade/*"
+            ],
+            "js": ["content.js"],
+            "run_at": "document_end"
+        },
+        {
       "matches": [
         "https://axiom.trade/*",
         "https://nova.trade/*"
       ],
-      "js": ["content.js"],
+      "js": ["content-pnl.js"],
       "run_at": "document_end"
+        },
+        {
+            "matches": ["https://axiom.trade/*"],
+            "js": ["content-twitter.js"],
+            "run_at": "document_end"
+        }
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": "icons/icon128.png"
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
     }
-  ],
-  "icons": {
-    "16": "icon16.png",
-    "48": "icon48.png",
-    "128": "icon128.png"
-  }
 }
